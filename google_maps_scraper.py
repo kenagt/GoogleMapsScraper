@@ -383,6 +383,7 @@ def scrape_url_data(google_url, chrome_install, chrome_options):
             except Exception as e:
                 socialMediaLinks = "N/A"
                 logger.error(f"socialMediaLinks: {e}")
+                logger.error(f"socialMediaLinks for URL: {url}")
 
         driver.quit() #Quit driver after usage
         
@@ -436,7 +437,8 @@ def perform_scraping():
     chrome_options.add_argument("--headless")  # Run Chrome in headless mode
     # Optionally, disable GPU if you encounter issues in headless mode
     chrome_options.add_argument("--disable-gpu")
-
+    chrome_options.add_argument("--log-level=1")
+    
     try:
         chrome_install = ChromeDriverManager().install()
         folder = os.path.dirname(chrome_install)
@@ -470,6 +472,8 @@ def perform_scraping():
         write_to_csv()
     except Exception as e:
         logger.error(f"An error occurred: {e}")
+        logger.error(f"An error occurred: {__file__}")
+        logger.error(f"An error occurred: {e.__traceback__.tb_lineno}")
     finally:
         try:
             driver.quit()
