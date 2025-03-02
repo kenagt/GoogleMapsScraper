@@ -13,6 +13,13 @@ from webdriver_manager.chrome import ChromeDriverManager
 from bs4 import BeautifulSoup
 import re
 import pandas as pd
+import logging
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
+logger = logging.getLogger(__name__)
 
 def extract_number(text):
   """
@@ -41,7 +48,6 @@ def extract_number(text):
   else:
     return None
 
-# Use a regular expression to remove unwanted characters
 def clean_text(text):
     return re.sub(r'[^\x00-\x7F]+', '', text).strip()  # Keep only ASCII characters
 
@@ -97,6 +103,7 @@ def scrape_google_maps_urls(search_query, driver):
             except:
                 # If the problem persists, print an error message and exit the script
                 print("Error: Failed to load search results")
+                logger.error(f"Failed to load search results")
                 driver.quit()
                 exit()
 
@@ -122,10 +129,10 @@ def scrape_google_maps_urls(search_query, driver):
             if url not in urls:
                 urls.append(url)
 
-        print("Loaded URL number: " + str(len(urls)) + "...")
+        logger.info(f"Loaded URL number: {str(len(urls))}")
 
         ###COMMENT
-        break
+        #break
 
         ###UNCOMMENT
         # Scroll down to load more businesses
@@ -150,10 +157,10 @@ def scrape_url_data(google_url, chrome_install, chrome_options):
     try:
         service = webdriver.chrome.service.Service(chrome_install)
         driver = webdriver.Chrome(service=service, options=chrome_options) #Pass the chrome_options
-        print("Loading URL: " + google_url)
+        logger.info(f"Loading URL: {google_url}")
         driver.get(google_url)
         WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, "body"))) 
-        print("Finished loading URL: " + google_url)
+        logger.info(f"Finished loading URL: {google_url}")
 
         # name of property
         try:
@@ -239,7 +246,7 @@ def scrape_url_data(google_url, chrome_install, chrome_options):
 
             # Extract the text content from each span and create a comma-separated string
             numberOfReviews = [span.text for span in spans]
-            numberOfReviews = numberOfReviews[0] + ", ".join(numberOfReviews[1:])
+            numberOfReviews = ", ".join(numberOfReviews)
             numberOfReviews = extract_number(numberOfReviews)
 
             if not numberOfReviews:
@@ -258,8 +265,9 @@ def scrape_url_data(google_url, chrome_install, chrome_options):
             if not averageReviewScore:
                 averageReviewScore = "N/A"
                 print("averageReviewScore: " + averageReviewScore)
-        except Exception as error:
+        except Exception as e:
             averageReviewScore = "N/A"
+            logger.error(f"averageReviewScoreHtml: {e}")
 
         # checkInOutTimes
         try:
@@ -270,12 +278,13 @@ def scrape_url_data(google_url, chrome_install, chrome_options):
             
             spans = soup.find_all('span')
             checkInOutTimes = [span.text for span in spans]
-            checkInOutTimes = checkInOutTimes[0] + ", ".join(checkInOutTimes[1:])
+            checkInOutTimes = checkInOutTimes[0] + " - " + checkInOutTimes[1]
 
             if not checkInOutTimes:
                 checkInOutTimes = "N/A"
-        except:
+        except Exception as e:
             checkInOutTimes = "N/A"
+            logger.error(f"checkInOutTimes: {e}")
 
         # amenities
         try:
@@ -289,13 +298,14 @@ def scrape_url_data(google_url, chrome_install, chrome_options):
             spans = soup.find_all('span')
             # Extract the text content from each span and create a comma-separated string
             amenities = [clean_text(span.text) for span in spans]
-            amenities = amenities[0] + ", ".join(amenities[1:])
+            amenities = ", ".join(amenities)
             amenities = amenities.replace(", , ", ", ")
 
             if not amenities:
                 amenities = "N/A"
-        except Exception as error:
+        except Exception as e:
             amenities = "N/A"
+            logger.error(f"amenities: {e}")
         
         # Number of OTAs
         try:
@@ -319,8 +329,9 @@ def scrape_url_data(google_url, chrome_install, chrome_options):
 
             if not numberOfOTAs:
                 numberOfOTAs = "N/A"
-        except Exception as error:
+        except Exception as e:
             numberOfOTAs = "N/A"
+            logger.error(f"numberOfOTAs: {e}")
 
         # OTA links
         try:
@@ -340,12 +351,13 @@ def scrape_url_data(google_url, chrome_install, chrome_options):
             hrefs = [a['href'] for a in atags if 'href' in a.attrs]
 
             # Extract the text content from each span and create a comma-separated string
-            otaLinks = hrefs[0] + ", ".join(hrefs[1:])
+            otaLinks = ", ".join(hrefs)
 
             if not otaLinks:
                 otaLinks = "N/A"
-        except Exception as error:
+        except Exception as e:
             otaLinks = "N/A"
+            logger.error(f"otaLinks: {e}")
 
         # Social media links
         if url != "N/A":
@@ -364,13 +376,13 @@ def scrape_url_data(google_url, chrome_install, chrome_options):
 
                 # Print the extracted links
                 socialMediaLinks = [link["href"] for link in links]
-                socialMediaLinks = socialMediaLinks[0] + ", ".join(socialMediaLinks[1:])
+                socialMediaLinks = ", ".join(socialMediaLinks)
 
                 if not socialMediaLinks:
                     socialMediaLinks = "N/A"
-            except Exception as error:
+            except Exception as e:
                 socialMediaLinks = "N/A"
-                print(error)
+                logger.error(f"socialMediaLinks: {e}")
 
         driver.quit() #Quit driver after usage
         
@@ -390,7 +402,7 @@ def scrape_url_data(google_url, chrome_install, chrome_options):
         }
 
     except Exception as e:
-        print(f"Error scraping {url}: {e}")
+        logger.error(f"Error scraping {url}: {e}")
         return None
 
 def write_to_csv():
@@ -402,23 +414,16 @@ def write_to_csv():
     csv_file = "google_maps_results.csv"
     df.to_csv(csv_file, index=False)
 
-    print(f"CSV file saved as {csv_file}")
+    logger.info(f"CSV file saved as {csv_file}")
 
 def write_to_json(data, filename="google_maps_results.json"):
     """Writes the scraped data to a JSON file."""
     try:
         with open(filename, "w", encoding="utf-8") as f:  # Specify encoding
             json.dump(data, f, indent=4, ensure_ascii=False)  # Pretty print and handle non-ASCII characters
-        print(f"Data written to {filename}")
+        logger.info(f"Data written to {filename}")
     except Exception as e:
-        print(f"Error writing to JSON file: {e}")
-
-def print_json_to_terminal(data):
-    """Prints the JSON data to the terminal in a readable format."""
-    try:
-        print(json.dumps(data, indent=4, ensure_ascii=False))
-    except Exception as e:
-        print(f"Error printing JSON to terminal: {e}")
+        logger.error(f"Error writing to JSON file: {e}")
 
 def perform_scraping():
     """Main scraping function."""
@@ -439,7 +444,7 @@ def perform_scraping():
         service = ChromeService(chromedriver_path)
         driver = webdriver.Chrome(service=service, options=chrome_options) #Pass the chrome_options
     except Exception as e:
-        print(f"Error setting up the Chrome driver: {e}")
+        logger.error(f"Error setting chrome: {e}")
         exit()
 
     driver.get("https://www.google.com/maps/search/Hotels/@30.3736662,-86.5128752,12z/data=!4m5!2m4!5m3!5m2!1s2025-03-01!2i3?authuser=0&entry=ttu&g_ep=EgoyMDI1MDIyNi4xIKXMDSoASAFQAw%3D%3D")
@@ -449,11 +454,11 @@ def perform_scraping():
         urls = scrape_google_maps_urls(search_query, driver)
         num_processes = multiprocessing.cpu_count()  # Use all available cores or adjust as needed
         
-        print("Final scrolled URL number: " + str(len(urls)))
+        logger.info(f"Final scrolled URL number: {str(len(urls))}")
 
         with multiprocessing.Pool(processes=num_processes) as pool:
             # Map the scraping function to the URLs
-            results = pool.starmap(scrape_url_data, [(google_url, chrome_install, chrome_options) for google_url in urls]) #Pass chrome_install one time
+            results = pool.starmap(scrape_url_data, [(google_url, chrome_install, chrome_options) for google_url in urls[:20]]) #Pass chrome_install one time
 
         # Filter out None results and format the output
         scraped_data = [result for result in results if result is not None]
@@ -464,13 +469,12 @@ def perform_scraping():
         # Write the data to the CSV file
         write_to_csv()
     except Exception as e:
-        print(f"An error occurred: {e}")
+        logger.error(f"An error occurred: {e}")
     finally:
         try:
             driver.quit()
         except:
             pass
-
 
 if __name__ == "__main__":
    perform_scraping()
