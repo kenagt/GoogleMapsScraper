@@ -11,7 +11,7 @@ Please scrape as many contacts as possible within a 5 km radius of this hotel lo
     2. **BONUS items**: 
 			**email address**, - COMMENT: Response from Google: No. Google Maps is an ever-expanding database of free business data: marketers can find place names, addresses, phone numbers, and official websites. However, Google Maps does not provide information on business email addresses or social media accounts to reach out through.
 			# of reviews, - DONE
-			date range of reviews (earlies review available to most recent published review), - COMMENT: There is only filter for most recent review.
+			date range of reviews (earlies review available to most recent published review), - COMMENT: There is only filter for most recent review. Google search response: Since January 2024, it appears this is no longer possible. Link: https://support.google.com/maps/thread/224565577/how-do-i-sort-the-reviews-on-places-shown-on-google-maps-by-date?hl=en
 			average review score, - DONE
 			name of other OTA (listings sites wehre listed, like Booking.com) links to those OTAs, - DONE
 			check in and check out times, - DONE
