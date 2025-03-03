@@ -72,6 +72,26 @@ def is_open_24_hours(hours_text):
                     return False
     return True
 
+def write_to_csv():
+    # Load JSON file
+    json_file = "google_maps_results.json"  # Change to your JSON file path
+    df = pd.read_json(json_file)
+
+    # Convert to CSV
+    csv_file = "google_maps_results.csv"
+    df.to_csv(csv_file, index=False)
+
+    logger.info(f"CSV file saved as {csv_file}")
+
+def write_to_json(data, filename):
+    """Writes the scraped data to a JSON file."""
+    try:
+        with open(filename, "w", encoding="utf-8") as f:  # Specify encoding
+            json.dump(data, f, indent=4, ensure_ascii=False)  # Pretty print and handle non-ASCII characters
+        logger.info(f"Data written to {filename}")
+    except Exception as e:
+        logger.error(f"Error writing to JSON file: {e}")
+
 def scrape_google_maps_urls(search_query, driver):    
     if search_query is not None:
         try:
@@ -172,6 +192,7 @@ def scrape_url_data(google_url, chrome_install, chrome_options):
         except Exception as e:
             name = "N/A"
             logger.error(f"name: {e}")
+            logger.error(f"name: {e.__traceback__.tb_lineno}")
 
         # link to the hotels website
         try:
@@ -184,6 +205,7 @@ def scrape_url_data(google_url, chrome_install, chrome_options):
         except Exception as e:
             url = "N/A"
             logger.error(f"url: {e}")
+            logger.error(f"url: {e.__traceback__.tb_lineno}")
 
         # address 
         try:
@@ -196,6 +218,7 @@ def scrape_url_data(google_url, chrome_install, chrome_options):
         except Exception as e:
             address = "N/A"
             logger.error(f"address: {e}")
+            logger.error(f"address: {e.__traceback__.tb_lineno}")
 
         # phone number
         try:
@@ -208,6 +231,7 @@ def scrape_url_data(google_url, chrome_install, chrome_options):
         except Exception as e:
             phone = "N/A"
             logger.error(f"phone: {e}")
+            logger.error(f"phone: {e.__traceback__.tb_lineno}")
 
         # working hours
         try:
@@ -234,6 +258,7 @@ def scrape_url_data(google_url, chrome_install, chrome_options):
         except Exception as e:
             workingHours = "N/A"
             logger.error(f"workingHours: {e}")
+            logger.error(f"workingHours: {e.__traceback__.tb_lineno}")
 
         # Number of reviews
         try:
@@ -250,14 +275,16 @@ def scrape_url_data(google_url, chrome_install, chrome_options):
 
             # Extract the text content from each span and create a comma-separated string
             numberOfReviews = [span.text for span in spans]
-            numberOfReviews = ", ".join(numberOfReviews)
-            numberOfReviews = extract_number(numberOfReviews)
-
-            if not numberOfReviews:
+            if len(numberOfReviews) > 0:
+                numberOfReviews = ", ".join(numberOfReviews)
+                numberOfReviews = extract_number(numberOfReviews)
+            else:
                 numberOfReviews = "N/A"
+
         except Exception as e:
             numberOfReviews = "N/A"
             logger.error(f"numberOfReviews: {e}")
+            logger.error(f"numberOfReviews: {e.__traceback__.tb_lineno}")
             
         # average review score
         try:
@@ -273,6 +300,7 @@ def scrape_url_data(google_url, chrome_install, chrome_options):
         except Exception as e:
             averageReviewScore = "N/A"
             logger.error(f"averageReviewScoreHtml: {e}")
+            logger.error(f"averageReviewScoreHtml: {e.__traceback__.tb_lineno}")
 
         # checkInOutTimes
         try:
@@ -283,13 +311,18 @@ def scrape_url_data(google_url, chrome_install, chrome_options):
             
             spans = soup.find_all('span')
             checkInOutTimes = [span.text for span in spans]
-            checkInOutTimes = checkInOutTimes[0] + " - " + checkInOutTimes[1]
-
-            if not checkInOutTimes:
+            if checkInOutTimes:
+                if(len(checkInOutTimes) > 1):
+                    checkInOutTimes = checkInOutTimes[0] + " - " + checkInOutTimes[1]
+                else:
+                    checkInOutTimes = checkInOutTimes[0]
+            else:
                 checkInOutTimes = "N/A"
+
         except Exception as e:
             checkInOutTimes = "N/A"
             logger.error(f"checkInOutTimes: {e}")
+            logger.error(f"checkInOutTimes: {e.__traceback__.tb_lineno}")
 
         # amenities
         try:
@@ -303,14 +336,16 @@ def scrape_url_data(google_url, chrome_install, chrome_options):
             spans = soup.find_all('span')
             # Extract the text content from each span and create a comma-separated string
             amenities = [clean_text(span.text) for span in spans]
-            amenities = ", ".join(amenities)
-            amenities = amenities.replace(", , ", ", ")
-
-            if not amenities:
+            if amenities and len(amenities) > 0:
+                amenities = ", ".join(amenities)
+                amenities = amenities.replace(", , ", ", ")
+            else:
                 amenities = "N/A"
+
         except Exception as e:
             amenities = "N/A"
             logger.error(f"amenities: {e}")
+            logger.error(f"amenities: {e.__traceback__.tb_lineno}")
         
         # Number of OTAs
         try:
@@ -337,6 +372,7 @@ def scrape_url_data(google_url, chrome_install, chrome_options):
         except Exception as e:
             numberOfOTAs = "N/A"
             logger.error(f"numberOfOTAs: {e}")
+            logger.error(f"numberOfOTAs: {e.__traceback__.tb_lineno}")
 
         # OTA links
         try:
@@ -356,13 +392,15 @@ def scrape_url_data(google_url, chrome_install, chrome_options):
             hrefs = [a['href'] for a in atags if 'href' in a.attrs]
 
             # Extract the text content from each span and create a comma-separated string
-            otaLinks = ", ".join(hrefs)
-
-            if not otaLinks:
+            if len(hrefs) > 0:
+                otaLinks = ", ".join(hrefs)
+            else:
                 otaLinks = "N/A"
+                
         except Exception as e:
             otaLinks = "N/A"
             logger.error(f"otaLinks: {e}")
+            logger.error(f"otaLinks: {e.__traceback__.tb_lineno}")
 
          # Social media links
         if url != "N/A":
@@ -388,7 +426,6 @@ def scrape_url_data(google_url, chrome_install, chrome_options):
             except Exception as e:
                 socialMediaLinks = "N/A"                
                 logger.error(f"socialMediaLinks: {e}")
-                logger.error(f"socialMediaLinks: {__file__}")
                 logger.error(f"socialMediaLinks: {e.__traceback__.tb_lineno}")
         else:
             socialMediaLinks = "N/A"
@@ -414,29 +451,8 @@ def scrape_url_data(google_url, chrome_install, chrome_options):
 
     except Exception as e:
         logger.error(f"Error scraping : {e}")
-        logger.error(f"Error scraping : {__file__}")
         logger.error(f"Error scraping : {e.__traceback__.tb_lineno}")
         return None
-
-def write_to_csv():
-    # Load JSON file
-    json_file = "google_maps_results.json"  # Change to your JSON file path
-    df = pd.read_json(json_file)
-
-    # Convert to CSV
-    csv_file = "google_maps_results.csv"
-    df.to_csv(csv_file, index=False)
-
-    logger.info(f"CSV file saved as {csv_file}")
-
-def write_to_json(data, filename):
-    """Writes the scraped data to a JSON file."""
-    try:
-        with open(filename, "w", encoding="utf-8") as f:  # Specify encoding
-            json.dump(data, f, indent=4, ensure_ascii=False)  # Pretty print and handle non-ASCII characters
-        logger.info(f"Data written to {filename}")
-    except Exception as e:
-        logger.error(f"Error writing to JSON file: {e}")
 
 def perform_scraping():
     """Main scraping function."""
@@ -450,6 +466,8 @@ def perform_scraping():
     # Optionally, disable GPU if you encounter issues in headless mode
     chrome_options.add_argument("--disable-gpu")
     chrome_options.add_argument("--log-level=1")
+    chrome_options.add_argument("--lang=en-US")
+    chrome_options.add_experimental_option('prefs', {'intl.accept_languages': 'en,en_US'})
     
     try:
         chrome_install = ChromeDriverManager().install()
@@ -492,7 +510,6 @@ def perform_scraping():
             driver.quit()
         except:
             pass
-
 
 if __name__ == "__main__":
    perform_scraping()
