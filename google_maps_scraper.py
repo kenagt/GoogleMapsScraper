@@ -364,7 +364,7 @@ def scrape_url_data(google_url, chrome_install, chrome_options):
             otaLinks = "N/A"
             logger.error(f"otaLinks: {e}")
 
-        # Social media links
+         # Social media links
         if url != "N/A":
             try:
                 driver.get("https://" + url)  
@@ -416,7 +416,6 @@ def scrape_url_data(google_url, chrome_install, chrome_options):
         logger.error(f"Error scraping : {e}")
         logger.error(f"Error scraping : {__file__}")
         logger.error(f"Error scraping : {e.__traceback__.tb_lineno}")
-        logger.error(f"Error scraping : {url}: {e}")
         return None
 
 def write_to_csv():
@@ -430,7 +429,7 @@ def write_to_csv():
 
     logger.info(f"CSV file saved as {csv_file}")
 
-def write_to_json(data, filename="google_maps_results.json"):
+def write_to_json(data, filename):
     """Writes the scraped data to a JSON file."""
     try:
         with open(filename, "w", encoding="utf-8") as f:  # Specify encoding
@@ -467,9 +466,10 @@ def perform_scraping():
     try:
         search_query = None
         urls = scrape_google_maps_urls(search_query, driver)
-        num_processes = 6 # multiprocessing.cpu_count()  # Use all available cores or adjust as needed
+        num_processes = multiprocessing.cpu_count()  # Use all available cores or adjust as needed
         
         logger.info(f"Final scrolled URL number: {str(len(urls))}")
+        write_to_json(urls, "google_maps_results_urls.json")
 
         with multiprocessing.Pool(processes=num_processes) as pool:
             # Map the scraping function to the URLs
@@ -479,7 +479,7 @@ def perform_scraping():
         scraped_data = [result for result in results if result is not None]
 
         # Write the data to the JSON file
-        write_to_json(scraped_data)
+        write_to_json(scraped_data, "google_maps_results.json")
         
         # Write the data to the CSV file
         write_to_csv()
