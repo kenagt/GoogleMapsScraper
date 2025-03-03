@@ -157,10 +157,9 @@ def scrape_url_data(google_url, chrome_install, chrome_options):
     try:
         service = webdriver.chrome.service.Service(chrome_install)
         driver = webdriver.Chrome(service=service, options=chrome_options) #Pass the chrome_options
-        logger.info(f"Loading URL: {google_url}")
+        logger.info(f"Scraping URL: {google_url}")
         driver.get(google_url)
         WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, "body"))) 
-        logger.info(f"Finished loading URL: {google_url}")
 
         # name of property
         try:
@@ -170,8 +169,9 @@ def scrape_url_data(google_url, chrome_install, chrome_options):
 
             if not name:
                 name = "N/A"
-        except Exception as error:
+        except Exception as e:
             name = "N/A"
+            logger.error(f"name: {e}")
 
         # link to the hotels website
         try:
@@ -181,8 +181,9 @@ def scrape_url_data(google_url, chrome_install, chrome_options):
 
             if not url:
                 url = "N/A"
-        except Exception as error:
+        except Exception as e:
             url = "N/A"
+            logger.error(f"url: {e}")
 
         # address 
         try:
@@ -192,8 +193,9 @@ def scrape_url_data(google_url, chrome_install, chrome_options):
 
             if not address:
                 address = "N/A"
-        except Exception as error:
+        except Exception as e:
             address = "N/A"
+            logger.error(f"address: {e}")
 
         # phone number
         try:
@@ -203,8 +205,9 @@ def scrape_url_data(google_url, chrome_install, chrome_options):
             
             if not phone:
                 phone = "N/A"
-        except Exception as error:
+        except Exception as e:
             phone = "N/A"
+            logger.error(f"phone: {e}")
 
         # working hours
         try:
@@ -228,8 +231,9 @@ def scrape_url_data(google_url, chrome_install, chrome_options):
 
             if not workingHours:
                 workingHours = "Open 24 hours"
-        except Exception as error:
+        except Exception as e:
             workingHours = "N/A"
+            logger.error(f"workingHours: {e}")
 
         # Number of reviews
         try:
@@ -251,8 +255,9 @@ def scrape_url_data(google_url, chrome_install, chrome_options):
 
             if not numberOfReviews:
                 numberOfReviews = "N/A"
-        except Exception as error:
+        except Exception as e:
             numberOfReviews = "N/A"
+            logger.error(f"numberOfReviews: {e}")
             
         # average review score
         try:
@@ -381,11 +386,16 @@ def scrape_url_data(google_url, chrome_install, chrome_options):
                 if not socialMediaLinks:
                     socialMediaLinks = "N/A"
             except Exception as e:
-                socialMediaLinks = "N/A"
+                socialMediaLinks = "N/A"                
                 logger.error(f"socialMediaLinks: {e}")
-                logger.error(f"socialMediaLinks for URL: {url}")
+                logger.error(f"socialMediaLinks: {__file__}")
+                logger.error(f"socialMediaLinks: {e.__traceback__.tb_lineno}")
+        else:
+            socialMediaLinks = "N/A"
 
         driver.quit() #Quit driver after usage
+
+        logger.info(f"Finished scraping URL: {google_url}")
         
         return {
             "name": name, 
@@ -403,7 +413,10 @@ def scrape_url_data(google_url, chrome_install, chrome_options):
         }
 
     except Exception as e:
-        logger.error(f"Error scraping {url}: {e}")
+        logger.error(f"Error scraping : {e}")
+        logger.error(f"Error scraping : {__file__}")
+        logger.error(f"Error scraping : {e.__traceback__.tb_lineno}")
+        logger.error(f"Error scraping : {url}: {e}")
         return None
 
 def write_to_csv():
@@ -454,13 +467,13 @@ def perform_scraping():
     try:
         search_query = None
         urls = scrape_google_maps_urls(search_query, driver)
-        num_processes = multiprocessing.cpu_count()  # Use all available cores or adjust as needed
+        num_processes = 6 # multiprocessing.cpu_count()  # Use all available cores or adjust as needed
         
         logger.info(f"Final scrolled URL number: {str(len(urls))}")
 
         with multiprocessing.Pool(processes=num_processes) as pool:
             # Map the scraping function to the URLs
-            results = pool.starmap(scrape_url_data, [(google_url, chrome_install, chrome_options) for google_url in urls[:20]]) #Pass chrome_install one time
+            results = pool.starmap(scrape_url_data, [(google_url, chrome_install, chrome_options) for google_url in urls]) #Pass chrome_install one time
 
         # Filter out None results and format the output
         scraped_data = [result for result in results if result is not None]
