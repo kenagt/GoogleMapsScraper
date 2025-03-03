@@ -493,5 +493,6 @@ def perform_scraping():
         except:
             pass
 
+
 if __name__ == "__main__":
    perform_scraping()
