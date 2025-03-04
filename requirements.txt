@@ -3,3 +3,5 @@ webdriver_manager==4.0.2
 beautifulsoup4==4.13.3
 pandas==2.2.3
 firebase-admin==6.6.0
+flask
+flask-socketio

@@ -107,7 +107,9 @@ def scrape_google_maps_urls(search_query, driver):
             WebDriverWait(driver, 10).until(
                 EC.presence_of_element_located((By.CLASS_NAME, 'hfpxzc'))
             )
-        except:
+        except Exception as e:
+            logger.error(f"An error occurred: {e}")
+            logger.error(f"An error occurred: {e.__traceback__.tb_lineno}")
             # If an exception occurs, retry the code block after a short delay
             time.sleep(5)
             try:
@@ -120,10 +122,10 @@ def scrape_google_maps_urls(search_query, driver):
                 WebDriverWait(driver, 10).until(
                     EC.presence_of_element_located((By.CLASS_NAME, 'hfpxzc'))
                 )
-            except:
+            except Exception as e:
                 # If the problem persists, print an error message and exit the script
-                print("Error: Failed to load search results")
-                logger.error(f"Failed to load search results")
+                logger.error(f"An error occurred: {e}")
+                logger.error(f"An error occurred: {e.__traceback__.tb_lineno}")
                 driver.quit()
                 exit()
 
@@ -137,8 +139,10 @@ def scrape_google_maps_urls(search_query, driver):
             businesses = WebDriverWait(driver, 10).until(
                 EC.presence_of_all_elements_located((By.CLASS_NAME, 'hfpxzc'))
             )
-        except:
+        except Exception as e:
             # If no businesses are found, break the loop
+            logger.error(f"An error occurred: {e}")
+            logger.error(f"An error occurred: {e.__traceback__.tb_lineno}")
             break
 
         time.sleep(5)
@@ -152,7 +156,7 @@ def scrape_google_maps_urls(search_query, driver):
         logger.info(f"Loaded URL number: {str(len(urls))}")
 
         ###COMMENT
-        #break
+        break
 
         ###UNCOMMENT
         # Scroll down to load more businesses
@@ -166,10 +170,14 @@ def scrape_google_maps_urls(search_query, driver):
             if len(new_businesses) == len(businesses):
                 # If no new businesses are loaded, break the loop
                break
-        except:
+        except Exception as e:
             # If an exception occurs, break the loop
+            logger.error(f"An error occurred: {e}")
+            logger.error(f"An error occurred: {e.__traceback__.tb_lineno}")
             break
         
+        
+    logger.info(f"Final scrolled URL number: {str(len(urls))}")
     return urls
 
 def scrape_url_data(google_url, chrome_install, chrome_options):
@@ -485,8 +493,6 @@ def perform_scraping():
         search_query = None
         urls = scrape_google_maps_urls(search_query, driver)
         num_processes = multiprocessing.cpu_count()  # Use all available cores or adjust as needed
-        
-        logger.info(f"Final scrolled URL number: {str(len(urls))}")
         write_to_json(urls, "google_maps_results_urls.json")
 
         with multiprocessing.Pool(processes=num_processes) as pool:
@@ -503,7 +509,6 @@ def perform_scraping():
         write_to_csv()
     except Exception as e:
         logger.error(f"An error occurred: {e}")
-        logger.error(f"An error occurred: {__file__}")
         logger.error(f"An error occurred: {e.__traceback__.tb_lineno}")
     finally:
         try:
