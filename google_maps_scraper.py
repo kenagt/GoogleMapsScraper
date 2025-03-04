@@ -468,7 +468,7 @@ def perform_scraping():
     progress = 0  # Reset progress
     scraped_data = []  # Reset scraped data
     
-     # Set up Chrome options for headless mode
+    # Set up Chrome options for headless mode
     chrome_options = Options()
     chrome_options.add_argument("--headless")  # Run Chrome in headless mode
     # Optionally, disable GPU if you encounter issues in headless mode
@@ -476,6 +476,8 @@ def perform_scraping():
     chrome_options.add_argument("--log-level=1")
     chrome_options.add_argument("--lang=en-US")
     chrome_options.add_experimental_option('prefs', {'intl.accept_languages': 'en,en_US'})
+    chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--disable-dev-shm-usage")
     
     try:
         chrome_install = ChromeDriverManager().install()
