@@ -369,39 +369,38 @@
                 var html = '';
     
                 for (var i = 0; i < keys.length; i++) {
-                  var field_value = rowData[i+1]; // +1 to skip view button
-                  var isLongText = field_value && field_value.length > 200; // Threshold
+                    var field_value = rowData[i+1]; // +1 to skip view button
+                    var parts = field_value.split(',');
     
                     html += '<div class="mb-3 modal-data-container">';
                     html += '<label for="data-' + keys[i] + '" class="form-label">' + keys[i] + ':</label>';
     
-                    if (isLongText) {
-                            var parts = field_value.split(',');
-                            for (var j = 0; j < parts.length; j++) {
-                                var part = parts[j].trim();
-                                // Improved URL check using a regular expression (no numbers in TLD)
-                                var urlRegex = /^(?:(?:https?|ftp):\/\/)?(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z]{2,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&//=]*)$/i;
-                                if (urlRegex.test(part)) {
-                                    // Add protocol if missing
-                                    var href = part.startsWith('http') ? part : 'https://' + part;
-                                    html += '<div class="mb-1"><a href="' + href + '" target="_blank" rel="noopener noreferrer">' + part + '</a></div>';
-                                } else {
-                                      html += '<span class="badge bg-secondary me-1" style="padding:7px;">' + part + '</span>';
-                                }
-                            }
-
-                        } else {
-                             // Improved URL check using a regular expression (no numbers in TLD)
+                    if (parts.length > 1) {
+                        for (var j = 0; j < parts.length; j++) {
+                            var part = parts[j].trim();
+                            // Improved URL check using a regular expression (no numbers in TLD)
                             var urlRegex = /^(?:(?:https?|ftp):\/\/)?(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z]{2,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&//=]*)$/i;
-                            if (urlRegex.test(field_value)) {
+                            if (urlRegex.test(part)) {
                                 // Add protocol if missing
-                                 var href = field_value.startsWith('http') ? field_value : 'https://' + field_value;
-                                html += '<div class="mb-1"><a href="' + href + '" target="_blank" rel="noopener noreferrer">' + field_value + '</a></div>';
-                            }else{
-                                html += '<input type="text" class="form-control" id="data-' + keys[i] + '" value="' + field_value + '" readonly>';
+                                var href = part.startsWith('http') ? part : 'https://' + part;
+                                html += '<div class="mb-1"><a href="' + href + '" target="_blank" rel="noopener noreferrer">' + part + '</a></div>';
+                            } else {
+                                    html += '<span class="badge bg-secondary me-1" style="padding:7px;">' + part + '</span>';
                             }
                         }
-    
+                    } else {
+                            // Improved URL check using a regular expression (no numbers in TLD)
+                        var urlRegex = /^(?:(?:https?|ftp):\/\/)?(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z]{2,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&//=]*)$/i;
+                        if (urlRegex.test(field_value)) {
+                            // Add protocol if missing
+                                var href = field_value.startsWith('http') ? field_value : 'https://' + field_value;
+                            html += '<div class="mb-1"><a href="' + href + '" target="_blank" rel="noopener noreferrer">' + field_value + '</a></div>';
+                        }
+                        else
+                        {
+                            html += '<input type="text" class="form-control" id="data-' + keys[i] + '" value="' + field_value + '" readonly>';
+                        }
+                    }    
                     html += '</div>';
                 }
     
