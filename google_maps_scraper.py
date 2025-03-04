@@ -156,7 +156,7 @@ def scrape_google_maps_urls(search_query, driver):
         logger.info(f"Loaded URL number: {str(len(urls))}")
 
         ###COMMENT
-        break
+        #break
 
         ###UNCOMMENT
         # Scroll down to load more businesses
@@ -354,8 +354,8 @@ def scrape_url_data(google_url, chrome_install, chrome_options):
             amenities = "N/A"
             logger.error(f"amenities: {e}")
             logger.error(f"amenities: {e.__traceback__.tb_lineno}")
-        
-        # Number of OTAs
+
+        # OTA links
         try:
             # Wait for the "Prices" tab and click it
             price_tab = WebDriverWait(driver, 10).until(
@@ -404,13 +404,13 @@ def scrape_url_data(google_url, chrome_install, chrome_options):
                 otaLinks = ", ".join(hrefs)
             else:
                 otaLinks = "N/A"
-                
+
         except Exception as e:
             otaLinks = "N/A"
             logger.error(f"otaLinks: {e}")
             logger.error(f"otaLinks: {e.__traceback__.tb_lineno}")
 
-         # Social media links
+        # Social media links
         if url != "N/A":
             try:
                 driver.get("https://" + url)  
