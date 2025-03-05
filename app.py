@@ -83,76 +83,83 @@ def run_scraping():
         scraping_in_progress = False  # Reset flag
 
 # --- Chart creation functions ---
-
 def create_rating_distribution_chart():
-    """Creates a Plotly bar chart for averageReviewScore distribution."""
+    """Creates a Plotly bar chart for rating distribution (1-5 stars)."""
     global scraped_data
-
+    
     if not scraped_data:
-        return "{}" # Return empty json
-
-    ratings = [data['averageReviewScore'] for data in scraped_data if data['averageReviewScore'] is not None]
+        return "{}"  # Return empty JSON object
+    
+    ratings = filter(lambda p: p != "N/A", scraped_data)    
+    ratings = [data['averageReviewScore'].replace(",", ".") for data in scraped_data if data['averageReviewScore'] != "N/A"]
+    ratings = [round(float(data)) for data in ratings]
+    
     if not ratings:
-        return "{}" # Return empty json
-
-    # Create bins (1.0, 1.5, 2.0, ..., 4.5, 5.0)
-    bins = [x / 2 for x in range(2, 11)]
-    counts, _ =  __import__('numpy').histogram(ratings, bins=bins)
-    labels = [f"{bins[i]}-{bins[i+1]}" for i in range(len(bins)-1)]
-
-    # Define colors for the bars
-    colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd']
-
-    # Create the bar chart using Plotly
-    fig = go.Figure(data=[go.Bar(x=labels, y=counts, marker_color=colors, text=counts, textposition='auto')])
-
+        return "{}"
+    
+    # Count occurrences of ratings 1 to 5
+    counts = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0}
+    for rating in ratings:
+        if rating in counts:
+            counts[rating] += 1
+    
+    labels = [str(key) + " Stars" for key in counts.keys()]
+    counts_list = list(counts.values())
+    
+    fig = go.Figure(data=[go.Bar(x=labels, y=counts_list, marker_color='blue', text=counts_list, textposition='auto')])
+    
     fig.update_layout(
         title="Hotel Rating Distribution",
-        xaxis_title="Rating Range",
+        xaxis_title="Star Ratings",
         yaxis_title="Number of Hotels",
-        template="plotly_white", # Use template
-        showlegend=False, # No legend needed
+        template="plotly_white",
+        showlegend=False,
         width=500,
         height=500,
     )
     return pio.to_json(fig)
 
-
 def create_price_distribution_chart():
-    """Creates a Plotly doughnut chart for price distribution."""
+    """Creates a Plotly pie chart for price distribution."""
     global scraped_data
+    
     if not scraped_data:
         return "{}"  # Return empty JSON object
+     
+    price_levels = filter(lambda p: p != "N/A", scraped_data)
+    price_levels = [data['averageOtaPrice'] for data in scraped_data if data['averageOtaPrice'] != "N/A"]   
+    price_levels = [round(float(data)) for data in price_levels]
 
-    price_levels = [data['averageOtaPrice'] for data in scraped_data if data['averageOtaPrice'] is not None]
     if not price_levels:
         return "{}"
-
-    counts = {1: 0, 2: 0, 3: 0, 4:0}  # Count occurrences of each price level (1-4)
-    for level in price_levels:
-        if level in counts:  # Make sure level is valid (1, 2, or 3)
-            counts[level] += 1
-        else: # Add level 4
-            counts[4] += 1
-            print(f"Unexpected price level: {level}")
-
-    labels = {
-        1: "Budget ($)",
-        2: "Mid-Range ($$)",
-        3: "Luxury ($$$)",
-        4: "Very Luxury ($$$$)"
-    }
-    labels_list = [labels[key] for key in counts if counts[key] > 0]  # Only include labels with counts
-    counts_list = [counts[key] for key in counts if counts[key] > 0] # Get the counts
-
+    
+    # Define price categories
+    counts = {"Up to $300": 0, "$301 - $600": 0, "$601 - $900": 0, "Above $900": 0}
+    
+    for price in price_levels:
+        if price <= 300:
+            counts["Up to $300"] += 1
+        elif price <= 600:
+            counts["$301 - $600"] += 1
+        elif price <= 900:
+            counts["$601 - $900"] += 1
+        else:
+            counts["Above $900"] += 1
+    
+    labels_list = list(counts.keys())
+    counts_list = list(counts.values())
+    
     fig = go.Figure(data=[go.Pie(labels=labels_list, values=counts_list, hole=0.4, marker={'colors': ['green', 'blue', 'orange', 'red']})])
-    fig.update_layout(title="Hotel Price Distribution", template="plotly_white")
+    
     fig.update_layout(
+        title="Hotel Price Distribution",
+        template="plotly_white",
         width=500,
         height=500,
     )
     
     return pio.to_json(fig)
+
 
 
 if __name__ == '__main__':

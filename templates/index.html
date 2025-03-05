@@ -235,7 +235,6 @@
             padding: 10px;
             width: 100%;          /* Still needed for responsiveness */
             position: relative;   /* Still needed for aspect ratio */
-            padding-bottom: 50%; /* Still needed for aspect ratio */
             margin-left: auto;  /* Center horizontally */
             margin-right: auto; /* Center horizontally */
         }
@@ -275,7 +274,6 @@
         </div>
 
         <!-- Charts -->
-        <h2>Charts</h2>
         <div class="row">
             <div class="col-md-6">
                 <div class="chart-container" id="ratingDistributionChart"></div>
@@ -286,7 +284,6 @@
         </div>
 
         {% if data %}
-            <h2>Scraped Data</h2>
             <div class="table-responsive">
               <div class="dataTables_scrollBodyWrapper">
                 <div class="dataTables_scrollBody">
@@ -349,8 +346,7 @@
                 </div>
             </div>
         </div>
-    </div>
-    
+    </div>    
     
     <footer>
         <p>© <span id="currentYear"></span> Google Maps Scraper. All rights reserved.</p>
@@ -468,8 +464,7 @@
     
               // Save the preference to localStorage
               localStorage.setItem('darkMode', isDarkMode);
-            }
-    
+            }    
     
             // Check for saved preference on load and set initial state
             const savedDarkMode = localStorage.getItem('darkMode');

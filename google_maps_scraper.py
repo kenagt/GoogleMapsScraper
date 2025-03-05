@@ -156,7 +156,7 @@ def scrape_google_maps_urls(search_query, driver):
         logger.info(f"Loaded URL number: {str(len(urls))}")
 
         ###COMMENT
-        break
+        #break
 
         ###UNCOMMENT
         # Scroll down to load more businesses
