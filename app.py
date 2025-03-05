@@ -111,7 +111,9 @@ def create_rating_distribution_chart():
         xaxis_title="Rating Range",
         yaxis_title="Number of Hotels",
         template="plotly_white", # Use template
-        showlegend=False # No legend needed
+        showlegend=False, # No legend needed
+        width=500,
+        height=500,
     )
     return pio.to_json(fig)
 
@@ -145,7 +147,11 @@ def create_price_distribution_chart():
 
     fig = go.Figure(data=[go.Pie(labels=labels_list, values=counts_list, hole=0.4, marker={'colors': ['green', 'blue', 'orange', 'red']})])
     fig.update_layout(title="Hotel Price Distribution", template="plotly_white")
-
+    fig.update_layout(
+        width=500,
+        height=500,
+    )
+    
     return pio.to_json(fig)
 
 

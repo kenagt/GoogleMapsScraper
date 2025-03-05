@@ -227,13 +227,17 @@
             color: white;
         }        
 
-        /* Chart container styles */
         .chart-container {
             margin-top: 20px;
             margin-bottom: 20px;
             border: 1px solid #ddd;
             border-radius: 5px;
             padding: 10px;
+            width: 100%;          /* Still needed for responsiveness */
+            position: relative;   /* Still needed for aspect ratio */
+            padding-bottom: 50%; /* Still needed for aspect ratio */
+            margin-left: auto;  /* Center horizontally */
+            margin-right: auto; /* Center horizontally */
         }
     </style>
 </head>
@@ -355,6 +359,7 @@
     <script src="https://code.jquery.com/jquery-3.7.0.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/fixedheader/3.3.2/js/dataTables.fixedHeader.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>  <!-- Plotly.js -->
     <script>
         $(document).ready( function () {
             var dataTable = $('#myTable').DataTable({
@@ -482,6 +487,17 @@
             
             // Set current year in the footer.  Run on document ready
             document.getElementById('currentYear').textContent = new Date().getFullYear();
+
+            // --- Plotly Chart Rendering ---
+            {% if rating_distribution_json %}
+                var ratingChartData = JSON.parse('{{ rating_distribution_json | safe }}');
+                Plotly.newPlot('ratingDistributionChart', ratingChartData.data, ratingChartData.layout);
+            {% endif %}
+
+            {% if price_distribution_json %}
+                var priceChartData = JSON.parse('{{ price_distribution_json | safe }}');
+                Plotly.newPlot('priceDistributionChart', priceChartData.data, priceChartData.layout);
+            {% endif %}
         } );
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
