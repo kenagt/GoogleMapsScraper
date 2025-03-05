@@ -156,7 +156,7 @@ def scrape_google_maps_urls(search_query, driver):
         logger.info(f"Loaded URL number: {str(len(urls))}")
 
         ###COMMENT
-        #break
+        break
 
         ###UNCOMMENT
         # Scroll down to load more businesses
@@ -355,7 +355,7 @@ def scrape_url_data(google_url, chrome_install, chrome_options):
             logger.error(f"amenities: {e}")
             logger.error(f"amenities: {e.__traceback__.tb_lineno}")
 
-        # OTA links
+        # Number of OTAs
         try:
             # Wait for the "Prices" tab and click it
             price_tab = WebDriverWait(driver, 10).until(
@@ -410,6 +410,25 @@ def scrape_url_data(google_url, chrome_install, chrome_options):
             logger.error(f"otaLinks: {e}")
             logger.error(f"otaLinks: {e.__traceback__.tb_lineno}")
 
+        # Calculate average OTA price
+        try:           
+            soup = BeautifulSoup(driver.page_source, 'html.parser')
+
+            # Find all span elements with both 'fontBodySmall' and 'gSamH' classes
+            divs = soup.find_all('div', class_='fontLabelMedium pUBf3e oiQUX')        
+
+            # Extract the text content from each span and create a comma-separated string
+            averageOtaPrice = [extract_number(div.text) for div in divs]
+            if len(averageOtaPrice) > 0:
+                averageOtaPrice = str(sum(averageOtaPrice) / len(averageOtaPrice))
+            else:
+                averageOtaPrice = "N/A"
+
+        except Exception as e:
+            averageOtaPrice = "N/A"
+            logger.error(f"averageOtaPrice: {e}")
+            logger.error(f"averageOtaPrice: {e.__traceback__.tb_lineno}")
+
         # Social media links
         if url != "N/A":
             try:
@@ -453,6 +472,7 @@ def scrape_url_data(google_url, chrome_install, chrome_options):
             "amenities": amenities,
             "numberOfOTAs": numberOfOTAs,
             "otaLinks": otaLinks,
+            "averageOtaPrice": averageOtaPrice,
             "socialMediaLinks": socialMediaLinks,
             "workingHours": workingHours
         }
