@@ -124,7 +124,7 @@ def create_price_distribution_chart():
     if not scraped_data:
         return "{}"  # Return empty JSON object
 
-    price_levels = [data['averageReviewScore'] for data in scraped_data if data['averageReviewScore'] is not None]
+    price_levels = [data['averageOtaPrice'] for data in scraped_data if data['averageOtaPrice'] is not None]
     if not price_levels:
         return "{}"
 
