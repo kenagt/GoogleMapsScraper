@@ -5,3 +5,4 @@ pandas==2.2.3
 firebase-admin==6.6.0
 flask
 flask-socketio
+plotly==6.0.0

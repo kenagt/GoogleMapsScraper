@@ -225,6 +225,15 @@
         footer.dark-mode{
             background-color: black;
             color: white;
+        }        
+
+        /* Chart container styles */
+        .chart-container {
+            margin-top: 20px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
         }
     </style>
 </head>
@@ -259,6 +268,17 @@
             {% else %}
                 <a href="{{ url_for('start_scraping') }}" class="btn btn-primary"><i class="fas fa-play me-2"></i> Start Scraping</a>
             {% endif %}
+        </div>
+
+        <!-- Charts -->
+        <h2>Charts</h2>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="chart-container" id="ratingDistributionChart"></div>
+            </div>
+            <div class="col-md-6">
+                <div class="chart-container" id="priceDistributionChart"></div>
+            </div>
         </div>
 
         {% if data %}
