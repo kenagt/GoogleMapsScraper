@@ -420,7 +420,7 @@ def scrape_url_data(google_url, chrome_install, chrome_options):
             # Extract the text content from each span and create a comma-separated string
             averageOtaPrice = [extract_number(div.text) for div in divs]
             if len(averageOtaPrice) > 0:
-                averageOtaPrice = str(sum(averageOtaPrice) / len(averageOtaPrice))
+                averageOtaPrice = str(round(sum(averageOtaPrice) / len(averageOtaPrice), 2))
             else:
                 averageOtaPrice = "N/A"
 
