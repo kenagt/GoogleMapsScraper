@@ -357,6 +357,37 @@
     <script src="https://cdn.datatables.net/fixedheader/3.3.2/js/dataTables.fixedHeader.min.js"></script>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>  <!-- Plotly.js -->
     <script>
+        
+        // Function to convert the string to the desired format
+        function formatString(input) {
+            // Capitalize the first letter of the first word, and make the rest lowercase
+            let capitalized = input.charAt(0).toUpperCase() + input.slice(1);
+
+            // Split the string into words using a regular expression that finds capital letters
+            let words = capitalized.replace(/([A-Z])/g, ' $1').trim().split(' ');
+
+            // Convert the first word to uppercase and all other words to lowercase
+            for (let i = 1; i < words.length; i++) {
+                words[i] = words[i].toLowerCase();
+            }
+
+            // Join the words back into a string with spaces
+            return words.join(' ');
+        }
+        // JavaScript function to update table headers after the page loads
+        window.onload = function() {
+            // Get all the header cells (<th>) in the table
+            const headers = document.querySelectorAll('th');
+
+            // Loop through each header and apply formatString to each key
+            headers.forEach(function(header, index) {
+                if (index > 0) {  // Skip the first header cell, which is "View"
+                    // Format the text of the header
+                    header.innerText = formatString(header.innerText);
+                }
+            });
+        };
+
         $(document).ready( function () {
             var dataTable = $('#myTable').DataTable({
                 "scrollX": false, // Remove scrollX - horizontal scrollbar
@@ -394,27 +425,29 @@
                     var parts = field_value.split(',');
     
                     html += '<div class="mb-3 modal-data-container">';
-                    html += '<label for="data-' + keys[i] + '" class="form-label">' + keys[i] + ':</label>';
+                    html += '<label for="data-' + keys[i] + '" class="form-label">' + formatString(keys[i]) + ':</label>';
     
                     if (parts.length > 1) {
                         for (var j = 0; j < parts.length; j++) {
                             var part = parts[j].trim();
                             // Improved URL check using a regular expression (no numbers in TLD)
                             var urlRegex = /^(?:(?:https?|ftp):\/\/)?(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z]{2,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&//=]*)$/i;
-                            if (urlRegex.test(part)) {
+                            var urlRegex2 = /https?:\/\/[a-zA-Z0-9\-\.]+(?:\:[0-9]+)?(?:\/[\w\-\.]*)*(?:\?[\w\=\&\%]*)?(?:#[\w\-]*)?/;
+                            
+                            if (urlRegex.test(part) || urlRegex2.test(part)) {
                                 // Add protocol if missing
                                 var href = part.startsWith('http') ? part : 'https://' + part;
-                                html += '<div class="mb-1"><a href="' + href + '" target="_blank" rel="noopener noreferrer">' + part + '</a></div>';
+                                html += '<div class="mb-1"><a href="' + href + '" target="_blank" rel="noopener noreferrer">' + part.substring(0, 50) + '</a></div>';
                             } else {
-                                    html += '<span class="badge bg-secondary me-1" style="padding:7px;">' + part + '</span>';
+                                html += '<span class="badge bg-secondary me-1" style="padding:7px;">' + part + '</span>';
                             }
                         }
                     } else {
-                            // Improved URL check using a regular expression (no numbers in TLD)
+                        // Improved URL check using a regular expression (no numbers in TLD)
                         var urlRegex = /^(?:(?:https?|ftp):\/\/)?(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z]{2,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&//=]*)$/i;
                         if (urlRegex.test(field_value)) {
                             // Add protocol if missing
-                                var href = field_value.startsWith('http') ? field_value : 'https://' + field_value;
+                            var href = field_value.startsWith('http') ? field_value : 'https://' + field_value;
                             html += '<div class="mb-1"><a href="' + href + '" target="_blank" rel="noopener noreferrer">' + field_value + '</a></div>';
                         }
                         else
