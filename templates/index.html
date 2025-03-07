@@ -42,6 +42,37 @@
             background-color: #0069d9;
             border-color: #0062cc;
         }
+        
+        /* Tab styles */
+        .nav-tabs .nav-link {
+            color: #495057;
+            border: 1px solid transparent;
+            border-top-left-radius: 0.25rem;
+            border-top-right-radius: 0.25rem;
+            transition: all 0.2s ease;
+        }
+
+        .nav-tabs .nav-link.active {
+            color: #007bff;
+            background-color: #fff;
+            border-color: #dee2e6 #dee2e6 #fff;
+            font-weight: 600;
+        }
+
+        .nav-tabs .nav-link:hover:not(.active) {
+            background-color: rgba(0, 123, 255, 0.1);
+        }
+        
+        /* Dark mode tab styles */
+        [data-bs-theme="dark"] .nav-tabs .nav-link.active {
+            color: #fff;
+            background-color: #343a40;
+            border-color: #495057 #495057 #343a40;
+        }
+        
+        [data-bs-theme="dark"] .nav-tabs .nav-link:hover:not(.active) {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
 
         /* Table specific styles */
         .dataTables_wrapper .dataTables_filter input {
@@ -273,43 +304,67 @@
             {% endif %}
         </div>
 
-        <!-- Charts -->
-        <div class="row">
-            <div class="col-md-6">
-                <div class="chart-container" id="ratingDistributionChart"></div>
+        <!-- Chart Tabs -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <ul class="nav nav-tabs card-header-tabs" id="chartTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="ratings-tab" data-bs-toggle="tab" data-bs-target="#ratings-tab-pane" type="button" role="tab" aria-controls="ratings-tab-pane" aria-selected="true">
+                            <i class="fas fa-star me-1"></i> Ratings
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="prices-tab" data-bs-toggle="tab" data-bs-target="#prices-tab-pane" type="button" role="tab" aria-controls="prices-tab-pane" aria-selected="false">
+                            <i class="fas fa-dollar-sign me-1"></i> Prices
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="positioning-tab" data-bs-toggle="tab" data-bs-target="#positioning-tab-pane" type="button" role="tab" aria-controls="positioning-tab-pane" aria-selected="false">
+                            <i class="fas fa-map-marker-alt me-1"></i> Market Positioning
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="amenities-tab" data-bs-toggle="tab" data-bs-target="#amenities-tab-pane" type="button" role="tab" aria-controls="amenities-tab-pane" aria-selected="false">
+                            <i class="fas fa-list-check me-1"></i> Amenity Analysis
+                        </button>
+                    </li>
+                </ul>
             </div>
-            <div class="col-md-6">
-                <div class="chart-container" id="priceDistributionChart"></div>
-            </div>
-        </div>
-        
-        <!-- Market Positioning Map -->
-        <div class="row mt-4">
-            <div class="col-12">
-                <div class="chart-container" id="marketPositioningChart"></div>
-            </div>
-        </div>
-
-        <!-- Amenity Gap Analysis Section -->
-        <div class="row mt-4">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-header">
+            <div class="card-body">
+                <div class="tab-content" id="chartTabsContent">
+                    <!-- Ratings Tab -->
+                    <div class="tab-pane fade show active" id="ratings-tab-pane" role="tabpanel" aria-labelledby="ratings-tab" tabindex="0">
+                        <h5 class="card-title">Hotel Rating Distribution</h5>
+                        <div class="chart-container" id="ratingDistributionChart"></div>
+                    </div>
+                    
+                    <!-- Prices Tab -->
+                    <div class="tab-pane fade" id="prices-tab-pane" role="tabpanel" aria-labelledby="prices-tab" tabindex="0">
+                        <h5 class="card-title">Hotel Price Distribution</h5>
+                        <div class="chart-container" id="priceDistributionChart"></div>
+                    </div>
+                    
+                    <!-- Market Positioning Tab -->
+                    <div class="tab-pane fade" id="positioning-tab-pane" role="tabpanel" aria-labelledby="positioning-tab" tabindex="0">
+                        <h5 class="card-title">Market Positioning Map: Price vs. Quality</h5>
+                        <div class="chart-container" id="marketPositioningChart"></div>
+                    </div>
+                    
+                    <!-- Amenity Analysis Tab -->
+                    <div class="tab-pane fade" id="amenities-tab-pane" role="tabpanel" aria-labelledby="amenities-tab" tabindex="0">
                         <h5 class="card-title">Amenity Gap Analysis</h5>
-                        <div class="row">
+                        <div class="row mb-3">
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="hotelSelect" class="form-label">Select Hotel:</label>
                                     <select class="form-select" id="hotelSelect">
-                                        {% for hotel_name in hotel_names %}
+                                        {% for hotel_name in hotels_with_amenities %}
                                         <option value="{{ hotel_name }}">{{ hotel_name }}</option>
                                         {% endfor %}
                                     </select>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="card-body">
                         <div class="chart-container" id="amenityAnalysisChart"></div>
                     </div>
                 </div>

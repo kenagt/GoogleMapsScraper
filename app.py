@@ -1,7 +1,7 @@
 import os
 import threading
 import pandas as pd
-from flask import Flask, render_template, redirect, url_for, flash
+from flask import Flask, render_template, redirect, url_for, flash, request
 # Import your scraper functions (perform_scraping, etc.)
 from google_maps_scraper import perform_scraping  # Replace with your actual file
 import json
@@ -53,19 +53,18 @@ def index():
     rating_distribution_json = create_rating_distribution_chart()
     price_distribution_json = create_price_distribution_chart()
     market_positioning_json = create_market_positioning_chart()
-    
-    # Add initial amenity analysis with default hotel
-    amenity_analysis_json = create_amenity_gap_analysis()
 
-    return render_template(
-        'index.html',
-        data=data,
-        scraping_in_progress=scraping_in_progress,
-        rating_distribution_json=rating_distribution_json,
-        price_distribution_json=price_distribution_json,
-        market_positioning_json=market_positioning_json,
-        amenity_analysis_json=amenity_analysis_json
-    )
+    # Get amenity analysis and hotel names
+    amenity_analysis_json, hotels_with_amenities = create_amenity_gap_analysis()
+
+    return render_template('index.html',
+                           data=data,
+                           scraping_in_progress=scraping_in_progress,
+                           rating_distribution_json=rating_distribution_json,
+                           price_distribution_json=price_distribution_json,
+                           market_positioning_json=market_positioning_json,
+                           amenity_analysis_json=amenity_analysis_json,
+                           hotels_with_amenities=hotels_with_amenities)
 
 
 @app.route('/start_scraping')
@@ -81,6 +80,12 @@ def start_scraping():
     else:
         flash("Scraping is already in progress.", 'warning')
     return redirect(url_for('index'))
+
+@app.route('/amenity_analysis')
+def amenity_analysis():
+    hotel_name = request.args.get('hotel_name', None)
+    analysis_json, _ = create_amenity_gap_analysis(hotel_name)
+    return analysis_json
 
 
 def run_scraping():
@@ -311,140 +316,160 @@ def create_market_positioning_chart():
 
     return pio.to_json(fig)
 
+
 def create_amenity_gap_analysis(hotel_name=None):
     """
     Creates a Plotly visualization for amenity gap analysis.
     Compares amenities of a selected hotel against competitors.
-    
+
     Args:
         hotel_name (str, optional): The name of the hotel to analyze. If None, uses the first hotel in data.
-    
+
     Returns:
-        str: JSON representation of the Plotly figure
+        tuple: (str: JSON representation of the Plotly figure, list: hotel names with amenities)
     """
     global scraped_data
-    
+
     if not scraped_data:
-        return "{}"  # Return empty JSON object
-        
+        return "{}", []  # Return empty JSON object and empty list
+
     # Extract amenities data
     hotels_with_amenities = []
     for hotel in scraped_data:
         if 'amenities' not in hotel or hotel['amenities'] == "N/A":
             continue
-            
+
         # Parse amenities (assuming they're stored as comma-separated strings)
         amenities_list = [a.strip() for a in hotel['amenities'].split(',')]
-        
+
         hotels_with_amenities.append({
             "name": hotel['name'],
             "amenities": amenities_list
         })
-    
+
     if not hotels_with_amenities:
-        return "{}"
-    
+        return "{}", []
+
+    # Get list of hotel names for dropdown
+    hotel_names = [h['name'] for h in hotels_with_amenities]
+
     # If no hotel name is provided, use the first one
-    if hotel_name is None or hotel_name not in [h['name'] for h in hotels_with_amenities]:
-        hotel_name = hotels_with_amenities[0]['name']
-    
+    if hotel_name is None or hotel_name not in hotel_names:
+        hotel_name = hotel_names[0] if hotel_names else None
+
+    # Exit early if we have no valid hotels
+    if not hotel_name:
+        return "{}", hotel_names
+
     # Get the target hotel
-    target_hotel = next((h for h in hotels_with_amenities if h['name'] == hotel_name), None)
+    target_hotel = next(
+        (h for h in hotels_with_amenities if h['name'] == hotel_name), None)
     if not target_hotel:
-        return "{}"
-    
+        return "{}", hotel_names
+
     # Find all unique amenities across all hotels
     all_amenities = set()
     for hotel in hotels_with_amenities:
         all_amenities.update(hotel['amenities'])
-    
+
     # Count how many competitors have each amenity
     amenity_counts = {amenity: 0 for amenity in all_amenities}
-    total_competitors = len(hotels_with_amenities) - 1  # Exclude the target hotel
-    
+    total_competitors = len(
+        hotels_with_amenities) - 1  # Exclude the target hotel
+
     for hotel in hotels_with_amenities:
         if hotel['name'] == hotel_name:
             continue  # Skip the target hotel
-        
+
         for amenity in hotel['amenities']:
             amenity_counts[amenity] += 1
-    
+
     # Calculate percentage of competitors with each amenity
-    amenity_percentages = {amenity: (count / total_competitors) * 100 for amenity, count in amenity_counts.items()}
-    
+    amenity_percentages = {
+        amenity: (count / total_competitors) * 100 if total_competitors > 0 else 0
+        for amenity, count in amenity_counts.items()
+    }
+
     # Categorize amenities for the target hotel
     unique_amenities = []  # Amenities only the target hotel has
     common_amenities = []  # Amenities the target hotel shares with others
-    missing_amenities = []  # Amenities competitors have but target hotel doesn't
-    
+    missing_amenities = [
+    ]  # Amenities competitors have but target hotel doesn't
+
     for amenity in all_amenities:
         has_amenity = amenity in target_hotel['amenities']
         percentage = amenity_percentages[amenity]
-        
+
         if has_amenity and percentage == 0:
             unique_amenities.append(amenity)
         elif has_amenity:
             common_amenities.append((amenity, percentage))
         else:
             missing_amenities.append((amenity, percentage))
-    
+
     # Sort amenities by percentage (descending)
     common_amenities.sort(key=lambda x: x[1], reverse=True)
     missing_amenities.sort(key=lambda x: x[1], reverse=True)
-    
+
     # Prepare data for visualization
     fig = go.Figure()
-    
+
     # Bar colors
-    unique_color = 'rgb(39, 174, 96)'     # Green
-    common_color = 'rgb(52, 152, 219)'    # Blue
-    missing_color = 'rgb(231, 76, 60)'    # Red
-    
+    unique_color = 'rgb(39, 174, 96)'  # Green
+    common_color = 'rgb(52, 152, 219)'  # Blue
+    missing_color = 'rgb(231, 76, 60)'  # Red
+
     # Add unique amenities
     if unique_amenities:
-        fig.add_trace(go.Bar(
-            y=unique_amenities,
-            x=[100] * len(unique_amenities),  # Set to 100% as these are unique
-            orientation='h',
-            name='Unique Amenities',
-            marker=dict(color=unique_color),
-            text=['Unique'] * len(unique_amenities),
-            textposition='inside',
-            hovertemplate='<b>%{y}</b><br>Unique to this hotel<extra></extra>'
-        ))
-    
+        fig.add_trace(
+            go.Bar(
+                y=unique_amenities,
+                x=[100] *
+                len(unique_amenities),  # Set to 100% as these are unique
+                orientation='h',
+                name='Unique Amenities',
+                marker=dict(color=unique_color),
+                text=['Unique'] * len(unique_amenities),
+                textposition='inside',
+                hovertemplate=
+                '<b>%{y}</b><br>Unique to this hotel<extra></extra>'))
+
     # Add common amenities
     if common_amenities:
         common_names = [item[0] for item in common_amenities]
         common_percentages = [item[1] for item in common_amenities]
-        
-        fig.add_trace(go.Bar(
-            y=common_names,
-            x=common_percentages,
-            orientation='h',
-            name='Common Amenities',
-            marker=dict(color=common_color),
-            text=[f"{p:.1f}%" for p in common_percentages],
-            textposition='outside',
-            hovertemplate='<b>%{y}</b><br>%{x:.1f}% of competitors have this<extra></extra>'
-        ))
-    
+
+        fig.add_trace(
+            go.Bar(
+                y=common_names,
+                x=common_percentages,
+                orientation='h',
+                name='Common Amenities',
+                marker=dict(color=common_color),
+                text=[f"{p:.1f}%" for p in common_percentages],
+                textposition='outside',
+                hovertemplate=
+                '<b>%{y}</b><br>%{x:.1f}% of competitors have this<extra></extra>'
+            ))
+
     # Add missing amenities
     if missing_amenities:
         missing_names = [item[0] for item in missing_amenities]
         missing_percentages = [item[1] for item in missing_amenities]
-        
-        fig.add_trace(go.Bar(
-            y=missing_names,
-            x=missing_percentages,
-            orientation='h',
-            name='Missing Amenities',
-            marker=dict(color=missing_color),
-            text=[f"{p:.1f}%" for p in missing_percentages],
-            textposition='outside',
-            hovertemplate='<b>%{y}</b><br>%{x:.1f}% of competitors have this<extra></extra>'
-        ))
-    
+
+        fig.add_trace(
+            go.Bar(
+                y=missing_names,
+                x=missing_percentages,
+                orientation='h',
+                name='Missing Amenities',
+                marker=dict(color=missing_color),
+                text=[f"{p:.1f}%" for p in missing_percentages],
+                textposition='outside',
+                hovertemplate=
+                '<b>%{y}</b><br>%{x:.1f}% of competitors have this<extra></extra>'
+            ))
+
     # Update layout
     fig.update_layout(
         title=f"Amenity Gap Analysis for {hotel_name}",
@@ -452,50 +477,51 @@ def create_amenity_gap_analysis(hotel_name=None):
         yaxis_title="Amenities",
         template="plotly_white",
         barmode='group',
-        height=max(500, 100 + 25 * len(all_amenities)),  # Dynamic height based on number of amenities
+        height=max(
+            500, 100 + 25 *
+            len(all_amenities)),  # Dynamic height based on number of amenities
         width=900,
-        legend=dict(
-            orientation="h",
-            yanchor="bottom",
-            y=1.02,
-            xanchor="right",
-            x=1
-        ),
-        margin=dict(l=150, r=50, t=80, b=50)  # Increase left margin for amenity names
+        legend=dict(orientation="h",
+                    yanchor="bottom",
+                    y=1.02,
+                    xanchor="right",
+                    x=1),
+        margin=dict(l=150, r=50, t=80,
+                    b=50)  # Increase left margin for amenity names
     )
-    
+
     # Add annotations for recommendations
     recommendations = []
-    
+
     # Add high-priority missing amenities (those that >50% of competitors have)
     high_priority = [item for item in missing_amenities if item[1] > 50]
     if high_priority:
-        high_names = ", ".join([item[0] for item in high_priority[:3]])  # Top 3
+        high_names = ", ".join([item[0]
+                                for item in high_priority[:3]])  # Top 3
         recommendations.append(f"Consider adding: {high_names}")
-    
+
     # Add unique selling points
     if unique_amenities:
         unique_names = ", ".join(unique_amenities[:3])  # Top 3
         recommendations.append(f"Highlight unique features: {unique_names}")
-    
+
     # Add the recommendations as annotations
     for i, rec in enumerate(recommendations):
-        fig.add_annotation(
-            x=0.5,
-            y=-0.15 - (i * 0.05),
-            xref="paper",
-            yref="paper",
-            text=rec,
-            showarrow=False,
-            font=dict(size=14),
-            align="center",
-            bgcolor="rgba(255, 255, 255, 0.8)",
-            bordercolor="rgba(0, 0, 0, 0.3)",
-            borderwidth=1,
-            borderpad=4
-        )
-    
-    return pio.to_json(fig)
+        fig.add_annotation(x=0.5,
+                           y=-0.15 - (i * 0.05),
+                           xref="paper",
+                           yref="paper",
+                           text=rec,
+                           showarrow=False,
+                           font=dict(size=14),
+                           align="center",
+                           bgcolor="rgba(255, 255, 255, 0.8)",
+                           bordercolor="rgba(0, 0, 0, 0.3)",
+                           borderwidth=1,
+                           borderpad=4)
+
+    return pio.to_json(fig), hotel_names
+
 
 if __name__ == '__main__':
     app.run(debug=True)
