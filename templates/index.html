@@ -42,7 +42,7 @@
             background-color: #0069d9;
             border-color: #0062cc;
         }
-        
+
         /* Tab styles */
         .nav-tabs .nav-link {
             color: #495057;
@@ -62,14 +62,14 @@
         .nav-tabs .nav-link:hover:not(.active) {
             background-color: rgba(0, 123, 255, 0.1);
         }
-        
+
         /* Dark mode tab styles */
         [data-bs-theme="dark"] .nav-tabs .nav-link.active {
             color: #fff;
             background-color: #343a40;
             border-color: #495057 #495057 #343a40;
         }
-        
+
         [data-bs-theme="dark"] .nav-tabs .nav-link:hover:not(.active) {
             background-color: rgba(255, 255, 255, 0.1);
         }
@@ -243,7 +243,7 @@
        .form-label.dark-mode {
             color: #e0e0e0;
         }
-        
+
 
         /* Footer Styles */
         footer {
@@ -252,6 +252,7 @@
             text-align: center;
             border-top: 1px solid #dee2e6;
             margin-top: 20px; /* Add some space above the footer */
+            transition: background-color 0.3s ease; /*Added transition for smooth change*/
         }
         footer.dark-mode{
             background-color: black;
@@ -309,7 +310,12 @@
             <div class="card-header">
                 <ul class="nav nav-tabs card-header-tabs" id="chartTabs" role="tablist">
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link active" id="ratings-tab" data-bs-toggle="tab" data-bs-target="#ratings-tab-pane" type="button" role="tab" aria-controls="ratings-tab-pane" aria-selected="true">
+                        <button class="nav-link active" id="data-tab" data-bs-toggle="tab" data-bs-target="#data-tab-pane" type="button" role="tab" aria-controls="data-tab-pane" aria-selected="true">
+                            <i class="fas fa-table me-1"></i> Data
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="ratings-tab" data-bs-toggle="tab" data-bs-target="#ratings-tab-pane" type="button" role="tab" aria-controls="ratings-tab-pane" aria-selected="false">
                             <i class="fas fa-star me-1"></i> Ratings
                         </button>
                     </li>
@@ -332,24 +338,74 @@
             </div>
             <div class="card-body">
                 <div class="tab-content" id="chartTabsContent">
+                    <!-- Data Tab -->
+                    <div class="tab-pane fade show active" id="data-tab-pane" role="tabpanel" aria-labelledby="data-tab" tabindex="0">
+                        <h5 class="card-title">Hotel Data</h5>
+                        {% if data %}
+                            <div class="table-responsive">
+                              <div class="dataTables_scrollBodyWrapper">
+                                <div class="dataTables_scrollBody">
+                                   <table id="myTable" class="table table-striped display">
+                                    <thead>
+                                        <tr>
+                                            <th>View</th>
+                                            {% for key in data[0].keys() %}
+                                                <th>{{ key }}</th>
+                                            {% endfor %}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for row in data %}
+                                            <tr>
+                                                <td>
+                                                    <button class="btn btn-sm btn-info view-button"
+                                                            data-bs-toggle="modal"
+                                                            data-bs-target="#detailModal"
+                                                            data-row-index="{{ loop.index0 }}">
+                                                        <i class="fas fa-eye"></i> View
+                                                    </button>
+                                                </td>
+                                                {% for value in row.values() %}
+                                                    <td>{{ value }}</td>
+                                                {% endfor %}
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                     <tfoot>
+                                        <tr>
+                                            <th>View</th>
+                                            {% for key in data[0].keys() %}
+                                                <th>{{ key }}</th>
+                                            {% endfor %}
+                                        </tr>
+                                    </tfoot>
+                                  </table>
+                                </div>
+                              </div>
+                            </div>
+                        {% else %}
+                            <p class="text-center">No data to display. Click 'Start Scraping' to begin.</p>
+                        {% endif %}
+                    </div>
+
                     <!-- Ratings Tab -->
-                    <div class="tab-pane fade show active" id="ratings-tab-pane" role="tabpanel" aria-labelledby="ratings-tab" tabindex="0">
+                    <div class="tab-pane fade" id="ratings-tab-pane" role="tabpanel" aria-labelledby="ratings-tab" tabindex="0">
                         <h5 class="card-title">Hotel Rating Distribution</h5>
                         <div class="chart-container" id="ratingDistributionChart"></div>
                     </div>
-                    
+
                     <!-- Prices Tab -->
                     <div class="tab-pane fade" id="prices-tab-pane" role="tabpanel" aria-labelledby="prices-tab" tabindex="0">
                         <h5 class="card-title">Hotel Price Distribution</h5>
                         <div class="chart-container" id="priceDistributionChart"></div>
                     </div>
-                    
+
                     <!-- Market Positioning Tab -->
                     <div class="tab-pane fade" id="positioning-tab-pane" role="tabpanel" aria-labelledby="positioning-tab" tabindex="0">
                         <h5 class="card-title">Market Positioning Map: Price vs. Quality</h5>
                         <div class="chart-container" id="marketPositioningChart"></div>
                     </div>
-                    
+
                     <!-- Amenity Analysis Tab -->
                     <div class="tab-pane fade" id="amenities-tab-pane" role="tabpanel" aria-labelledby="amenities-tab" tabindex="0">
                         <h5 class="card-title">Amenity Gap Analysis</h5>
@@ -371,52 +427,6 @@
             </div>
         </div>
 
-        {% if data %}
-            <div class="table-responsive">
-              <div class="dataTables_scrollBodyWrapper">
-                <div class="dataTables_scrollBody">
-                   <table id="myTable" class="table table-striped display">
-                    <thead>
-                        <tr>
-                            <th>View</th>
-                            {% for key in data[0].keys() %}
-                                <th>{{ key }}</th>
-                            {% endfor %}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for row in data %}
-                            <tr>
-                                <td>
-                                    <button class="btn btn-sm btn-info view-button"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#detailModal"
-                                            data-row-index="{{ loop.index0 }}">
-                                        <i class="fas fa-eye"></i> View
-                                    </button>
-                                </td>
-                                {% for value in row.values() %}
-                                    <td>{{ value }}</td>
-                                {% endfor %}
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                     <tfoot>
-                        <tr>
-                            <th>View</th>
-                            {% for key in data[0].keys() %}
-                                <th>{{ key }}</th>
-                            {% endfor %}
-                        </tr>
-                    </tfoot>
-                  </table>
-                </div>
-              </div>
-            </div>
-        {% else %}
-            <p class="text-center">No data to display. Click 'Start Scraping' to begin.</p>
-        {% endif %}
-
         <!-- Detail Modal -->
         <div class="modal fade" id="detailModal" tabindex="-1" aria-labelledby="detailModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-lg modal-dialog-scrollable">
@@ -435,7 +445,7 @@
             </div>
         </div>
     </div>    
-    
+
     <footer>
         <p>© <span id="currentYear"></span> Google Maps Scraper. All rights reserved.</p>
     </footer>
@@ -445,7 +455,7 @@
     <script src="https://cdn.datatables.net/fixedheader/3.3.2/js/dataTables.fixedHeader.min.js"></script>
     <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>  <!-- Plotly.js -->
     <script>
-        
+
         // Function to convert the string to the desired format
         function formatString(input) {
             // Capitalize the first letter of the first word, and make the rest lowercase
@@ -489,39 +499,39 @@
                     footer: true
                 },
             });
-    
+
             // Hides the datatable scroll Head.
             $('.dataTables_scrollHead').hide();
-    
+
             // Handle click on view button
             $('#myTable tbody').on('click', '.view-button', function () {
                 var rowIndex = $(this).data('row-index');
                  //Use this code to get all data
                 var allData = dataTable.rows().data().toArray();
-    
+
                 var rowData = allData[rowIndex]; // Get row data
-    
+
                 // Populate the modal body with the row data
                 var modalBody = $('#detailModal .modal-body');
                 modalBody.empty(); // Clear previous content
-    
+
                 var keys = {% if data %}{{ data[0].keys()|list|safe }}{% else %}[]{% endif %}; // Get the keys
                 var html = '';
-    
+
                 for (var i = 0; i < keys.length; i++) {
                     var field_value = rowData[i+1]; // +1 to skip view button
                     var parts = field_value.split(',');
-    
+
                     html += '<div class="mb-3 modal-data-container">';
                     html += '<label for="data-' + keys[i] + '" class="form-label">' + formatString(keys[i]) + ':</label>';
-    
+
                     if (parts.length > 1) {
                         for (var j = 0; j < parts.length; j++) {
                             var part = parts[j].trim();
                             // Improved URL check using a regular expression (no numbers in TLD)
                             var urlRegex = /^(?:(?:https?|ftp):\/\/)?(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z]{2,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&//=]*)$/i;
                             var urlRegex2 = /https?:\/\/[a-zA-Z0-9\-\.]+(?:\:[0-9]+)?(?:\/[\w\-\.]*)*(?:\?[\w\=\&\%]*)?(?:#[\w\-]*)?/;
-                            
+
                             if (urlRegex.test(part) || urlRegex2.test(part)) {
                                 // Add protocol if missing
                                 var href = part.startsWith('http') ? part : 'https://' + part;
@@ -545,26 +555,26 @@
                     }    
                     html += '</div>';
                 }
-    
+
                 modalBody.append(html);
             });
-    
+
           // Dark Mode Toggle
           const darkModeSwitch = document.getElementById('darkModeSwitch');
           const lightModeIcon = document.getElementById('lightModeIcon');
           const darkModeIcon = document.getElementById('darkModeIcon');
-    
+
             // Function to set the theme
             function setTheme(isDarkMode) {
                 const htmlElement = document.documentElement; // Get the <html> element
-    
+
               // Add or remove the data-bs-theme attribute for Bootstrap
               if (isDarkMode) {
                 htmlElement.setAttribute('data-bs-theme', 'dark');
               } else {
                 htmlElement.removeAttribute('data-bs-theme');
               }
-    
+
               // Toggle icon visibility
                 if (isDarkMode) {
                     lightModeIcon.classList.remove('active');
@@ -573,20 +583,22 @@
                     lightModeIcon.classList.add('active');
                     darkModeIcon.classList.remove('active');
                 }
-    
+
                 // Add dark mode to other elements.
                 const h1 = document.querySelector('h1'); // Added for h1
                 const scraperIcon = document.querySelector('.scraper-icon');
                 const formLabels = document.querySelectorAll('.form-label'); // For labels
-    
+                const footer = document.querySelector('footer'); // Get the footer element
+
                 h1.classList.toggle('dark-mode', isDarkMode);
                 scraperIcon.classList.toggle('dark-mode', isDarkMode);
                 formLabels.forEach(element => element.classList.toggle('dark-mode', isDarkMode));
-    
+                footer.classList.toggle('dark-mode', isDarkMode);
+
               // Save the preference to localStorage
               localStorage.setItem('darkMode', isDarkMode);
             }    
-    
+
             // Check for saved preference on load and set initial state
             const savedDarkMode = localStorage.getItem('darkMode');
             if (savedDarkMode === 'true') {
@@ -595,30 +607,54 @@
             } else {
                 lightModeIcon.classList.add('active'); // Show light mode icon by default
             }
-    
+            
+            // Set the initial chart theme based on dark mode setting
+            const initialTheme = savedDarkMode === 'true' ? 'plotly_dark' : 'plotly_white';
+
             // Event listener for the switch
             darkModeSwitch.addEventListener('change', function() {
                 setTheme(this.checked);
+                
+                // Update charts with dark/light theme
+                updateChartsTheme(this.checked);
             });
             
+            // Function to update all charts with appropriate theme
+            function updateChartsTheme(isDarkMode) {
+                const theme = isDarkMode ? 'plotly_dark' : 'plotly_white';
+                const chartDivs = ['ratingDistributionChart', 'priceDistributionChart', 'marketPositioningChart', 'amenityAnalysisChart'];
+                
+                chartDivs.forEach(chartDiv => {
+                    const chartElement = document.getElementById(chartDiv);
+                    if (chartElement && chartElement.data && chartElement.layout) {
+                        Plotly.update(chartDiv, {}, {template: theme});
+                    }
+                });
+            }
+
             // Set current year in the footer.  Run on document ready
             document.getElementById('currentYear').textContent = new Date().getFullYear();
 
             // --- Plotly Chart Rendering ---
             {% if rating_distribution_json %}
                 var ratingChartData = JSON.parse('{{ rating_distribution_json | safe }}');
+                // Apply current theme
+                ratingChartData.layout.template = initialTheme;
                 Plotly.newPlot('ratingDistributionChart', ratingChartData.data, ratingChartData.layout);
             {% endif %}
 
             {% if price_distribution_json %}
                 var priceChartData = JSON.parse('{{ price_distribution_json | safe }}');
+                // Apply current theme
+                priceChartData.layout.template = initialTheme;
                 Plotly.newPlot('priceDistributionChart', priceChartData.data, priceChartData.layout);
             {% endif %}
-            
+
             {% if market_positioning_json %}
                 try {
                     var marketPositioningData = JSON.parse('{{ market_positioning_json | safe }}');
-                    
+                    // Apply current theme
+                    marketPositioningData.layout.template = initialTheme;
                     Plotly.newPlot('marketPositioningChart', marketPositioningData.data, marketPositioningData.layout);
                 } catch (e) {
                     console.error("Error parsing market positioning data:", e);
@@ -629,24 +665,33 @@
             // Render the initial amenity analysis chart
             {% if amenity_analysis_json %}
                 try {
+                    // Clear any existing loading indicators
+                    $('#amenityLoadingIndicator').remove();
                     var amenityAnalysisData = JSON.parse('{{ amenity_analysis_json | safe }}');
+                    // Apply current theme
+                    amenityAnalysisData.layout.template = initialTheme;
                     Plotly.newPlot('amenityAnalysisChart', amenityAnalysisData.data, amenityAnalysisData.layout);
                 } catch (e) {
                     console.error("Error parsing amenity analysis data:", e);
                     document.getElementById('amenityAnalysisChart').innerHTML = '<div class="alert alert-danger">Error loading amenity analysis chart</div>';
                 }
             {% endif %}
-            
+
             // Handle hotel selection change
             $('#hotelSelect').change(function() {
                 const selectedHotel = $(this).val();
-                
-                // Show loading indicator
-                $('#amenityAnalysisChart').html('<div class="text-center"><i class="fas fa-spinner fa-spin fa-3x"></i><p>Loading analysis...</p></div>');
-                
+
+                // Show loading indicator with an ID for easier reference
+                $('#amenityAnalysisChart').html('<div id="amenityLoadingIndicator" class="text-center"><i class="fas fa-spinner fa-spin fa-3x"></i><p>Loading analysis...</p></div>');
+
                 // Fetch new data
                 $.getJSON('/amenity_analysis', { hotel_name: selectedHotel }, function(data) {
                     try {
+                        // Remove loading indicator before plotting
+                        $('#amenityLoadingIndicator').remove();
+                        // Apply current theme based on dark mode setting
+                        const currentTheme = darkModeSwitch.checked ? 'plotly_dark' : 'plotly_white';
+                        data.layout.template = currentTheme;
                         Plotly.newPlot('amenityAnalysisChart', data.data, data.layout);
                     } catch (e) {
                         console.error("Error rendering amenity analysis:", e);
