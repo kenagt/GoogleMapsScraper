@@ -356,11 +356,11 @@ def create_amenity_gap_analysis(hotel_name=None):
         return "{}", hotel_names
 
     # Get the target hotel
-    target_hotel = next(
-        (h for h in hotels_with_amenities if h['name'] == hotel_name), None)
+    target_hotel = next((h for h in hotels_with_amenities if h['name'] == hotel_name), None)
+
     if not target_hotel:
         return "{}", hotel_names
-
+    
     # Find all unique amenities across all hotels
     all_amenities = set()
     for hotel in hotels_with_amenities:
@@ -368,8 +368,7 @@ def create_amenity_gap_analysis(hotel_name=None):
 
     # Count how many competitors have each amenity
     amenity_counts = {amenity: 0 for amenity in all_amenities}
-    total_competitors = len(
-        hotels_with_amenities) - 1  # Exclude the target hotel
+    total_competitors = len(hotels_with_amenities) - 1  # Exclude the target hotel
 
     for hotel in hotels_with_amenities:
         if hotel['name'] == hotel_name:
