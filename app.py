@@ -66,7 +66,6 @@ def index():
                            amenity_analysis_json=amenity_analysis_json,
                            hotels_with_amenities=hotels_with_amenities)
 
-
 @app.route('/start_scraping')
 def start_scraping():
     global scraping_in_progress

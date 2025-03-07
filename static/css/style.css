@@ -1,41 +1,260 @@
-/* style.css */
-body {
-    background-color: #f8f9fa;
-    color: #343a40;
-    font-family: Arial, sans-serif;
+ /* Custom Styles */
+ body {
+    font-family: 'Arial', sans-serif;
+    transition: background-color 0.3s ease; /* Smooth transition */
 }
 
 .container {
-    max-width: 960px;
-    margin-top: 50px;
+    margin-top: 20px;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    transition:  box-shadow 0.3s ease;
 }
 
 h1 {
-    font-size: 2.5rem;
+    text-align: center;
+    margin-bottom: 30px;
+    transition: color 0.3s ease;
+}
+h1.dark-mode{
+    color: white;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.btn-primary:hover {
+    background-color: #0069d9;
+    border-color: #0062cc;
+}
+
+/* Tab styles */
+.nav-tabs .nav-link {
+    color: #495057;
+    border: 1px solid transparent;
+    border-top-left-radius: 0.25rem;
+    border-top-right-radius: 0.25rem;
+    transition: all 0.2s ease;
+}
+
+.nav-tabs .nav-link.active {
     color: #007bff;
+    background-color: #fff;
+    border-color: #dee2e6 #dee2e6 #fff;
+    font-weight: 600;
 }
 
-table {
-    margin-top: 30px;
-    width: 100%;
-    border-collapse: collapse;
+.nav-tabs .nav-link:hover:not(.active) {
+    background-color: rgba(0, 123, 255, 0.1);
 }
 
-th, td {
-    padding: 12px;
+/* Dark mode tab styles */
+[data-bs-theme="dark"] .nav-tabs .nav-link.active {
+    color: #fff;
+    background-color: #343a40;
+    border-color: #495057 #495057 #343a40;
+}
+
+[data-bs-theme="dark"] .nav-tabs .nav-link:hover:not(.active) {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Table specific styles */
+.dataTables_wrapper .dataTables_filter input {
+    border-radius: 5px;
+    border: 1px solid #ced4da;
+    padding: 5px;
+    margin-bottom: 10px;
+    transition: border-color 0.3s ease;
+}
+
+table.dataTable thead th {
     text-align: left;
-    border-bottom: 1px solid #ddd;
+    white-space: nowrap;
+    font-size: 14px;
 }
 
-th {
+/* Responsive font size for the thead */
+@media (max-width: 768px) {
+    table.dataTable thead th {
+        font-size: 12px;
+    }
+}
+
+.scraper-icon {
+    font-size: 2rem;
+    color: #007bff;
+    transition: color 0.3s ease;
+}
+
+.dataTables_info {
+    font-style: italic;
+    font-size: 0.9em;
+    transition: color 0.3s ease;
+}
+
+/* Modal styles */
+.modal-content {
+    border-radius: 15px;
+    border: none;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+   transition:  box-shadow 0.3s ease;
+}
+
+.modal-header {
+    border-bottom: none;
+    padding: 1rem 1.5rem;
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+}
+
+.modal-title {
+    font-weight: bold;
+}
+
+.modal-body {
+    padding: 1.5rem;
+}
+
+.modal-footer {
+    border-top: none;
+    padding: 1rem 1.5rem;
+}
+
+.form-control[readonly], .form-control:disabled, .form-control[disabled], .form-textarea[readonly], .form-textarea:disabled, .form-textarea[disabled] {
+    cursor: not-allowed;
+    transition:  border-color 0.3s ease, color 0.3s ease;
+}
+
+.form-label {
+    font-weight: bold;
+   transition: color 0.3s ease;
+}
+
+/* Style Scroll Bar in Modal - Webkit Browsers */
+#detailModal .modal-body::-webkit-scrollbar {
+    width: 8px; /* Adjust width of the scrollbar */
+}
+
+#detailModal .modal-body::-webkit-scrollbar-track {
+    background: #f1f1f1; /* Track color */
+    border-radius: 5px;
+}
+
+#detailModal .modal-body::-webkit-scrollbar-thumb {
+    background: #888; /* Handle color */
+    border-radius: 5px;
+}
+
+#detailModal .modal-body::-webkit-scrollbar-thumb:hover {
+    background: #555; /* Handle color on hover */
+}
+/* Modal Data Container*/
+.modal-data-container {
+  margin-bottom: 15px;
+}
+
+/* Style to move the horizontal scrollbar for DATA portion to top.  Note: Requires adjustments to scrollHead styling */
+.dataTables_scrollBodyWrapper {
+    position: relative;
+}
+.dataTables_scrollBody {
+  overflow-x: auto; /* This enables the horizontal scrollbar ONLY for body */
+  position: relative; /* To allow absolute positioning */
+}
+
+.dataTables_scrollBody + .dataTables_scrollHead {
+  position: absolute; /* Place over header */
+  overflow: hidden; /* This HIDES the header scroll */
+  top: 0; /* Aligns to top */
+  left: 0; /*Aligns to the left */
+  width: 100%;
+  box-sizing: border-box; /*Account for padding and border */
+}
+
+/* Force the Footer to Stay at the Bottom */
+tfoot {
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+/* Truncate text in table cells */
+#myTable td {
+    max-width: 200px; /* Set a max width for the cells */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.dataTables_scrollBody::-webkit-scrollbar {
+    height: 8px;  /* Adjust the height of the scrollbar */
+    width: 8px;
+}
+
+.dataTables_scrollBody::-webkit-scrollbar-track {
+    background-color: #f1f1f1; /* Color of the tracking area */
+    border-radius: 5px;
+}
+
+.dataTables_scrollBody::-webkit-scrollbar-thumb {
+    background-color: #888; /* Color of the scroll thumb */
+    border-radius: 5px;
+}
+
+.dataTables_scrollBody::-webkit-scrollbar-thumb:hover {
+    background-color: #555; /* Color of the scroll thumb on hover */
+}
+
+/*Dark mode switch*/
+.form-check-input:checked {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+.form-check-input:focus {
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25);
+}
+.dark-mode-icon {
+display: none; /* Initially hide both icons */
+}
+
+.dark-mode-icon.active {
+    display: inline-block; /* Show only the active icon */
+}
+
+.scraper-icon.dark-mode{
+    color: white;
+}
+
+.form-label.dark-mode {
+    color: #e0e0e0;
+}
+
+
+/* Footer Styles */
+footer {
     background-color: #f8f9fa;
+    padding: 10px 0;
+    text-align: center;
+    border-top: 1px solid #dee2e6;
+    margin-top: 20px; /* Add some space above the footer */
+    transition: background-color 0.3s ease; /*Added transition for smooth change*/
 }
+footer.dark-mode{
+    background-color: black;
+    color: white;
+}        
 
-button {
+.chart-container {
     margin-top: 20px;
     margin-bottom: 20px;
-}
-
-.alert {
-    margin-top: 20px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 10px;
+    width: 100%;          /* Still needed for responsiveness */
+    position: relative;   /* Still needed for aspect ratio */
+    margin-left: auto;  /* Center horizontally */
+    margin-right: auto; /* Center horizontally */
 }
