@@ -282,6 +282,39 @@
                 <div class="chart-container" id="priceDistributionChart"></div>
             </div>
         </div>
+        
+        <!-- Market Positioning Map -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="chart-container" id="marketPositioningChart"></div>
+            </div>
+        </div>
+
+        <!-- Amenity Gap Analysis Section -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title">Amenity Gap Analysis</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="hotelSelect" class="form-label">Select Hotel:</label>
+                                    <select class="form-select" id="hotelSelect">
+                                        {% for hotel_name in hotel_names %}
+                                        <option value="{{ hotel_name }}">{{ hotel_name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container" id="amenityAnalysisChart"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         {% if data %}
             <div class="table-responsive">
@@ -355,8 +388,9 @@
     <script src="https://code.jquery.com/jquery-3.7.0.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/fixedheader/3.3.2/js/dataTables.fixedHeader.min.js"></script>
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>  <!-- Plotly.js -->
+    <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>  <!-- Plotly.js -->
     <script>
+        
         // Function to convert the string to the desired format
         function formatString(input) {
             // Capitalize the first letter of the first word, and make the rest lowercase
@@ -525,6 +559,48 @@
                 var priceChartData = JSON.parse('{{ price_distribution_json | safe }}');
                 Plotly.newPlot('priceDistributionChart', priceChartData.data, priceChartData.layout);
             {% endif %}
+            
+            {% if market_positioning_json %}
+                try {
+                    var marketPositioningData = JSON.parse('{{ market_positioning_json | safe }}');
+                    
+                    Plotly.newPlot('marketPositioningChart', marketPositioningData.data, marketPositioningData.layout);
+                } catch (e) {
+                    console.error("Error parsing market positioning data:", e);
+                    document.getElementById('marketPositioningChart').innerHTML = '<div class="alert alert-danger">Error loading market positioning chart</div>';
+                }
+            {% endif %}
+
+            // Render the initial amenity analysis chart
+            {% if amenity_analysis_json %}
+                try {
+                    var amenityAnalysisData = JSON.parse('{{ amenity_analysis_json | safe }}');
+                    Plotly.newPlot('amenityAnalysisChart', amenityAnalysisData.data, amenityAnalysisData.layout);
+                } catch (e) {
+                    console.error("Error parsing amenity analysis data:", e);
+                    document.getElementById('amenityAnalysisChart').innerHTML = '<div class="alert alert-danger">Error loading amenity analysis chart</div>';
+                }
+            {% endif %}
+            
+            // Handle hotel selection change
+            $('#hotelSelect').change(function() {
+                const selectedHotel = $(this).val();
+                
+                // Show loading indicator
+                $('#amenityAnalysisChart').html('<div class="text-center"><i class="fas fa-spinner fa-spin fa-3x"></i><p>Loading analysis...</p></div>');
+                
+                // Fetch new data
+                $.getJSON('/amenity_analysis', { hotel_name: selectedHotel }, function(data) {
+                    try {
+                        Plotly.newPlot('amenityAnalysisChart', data.data, data.layout);
+                    } catch (e) {
+                        console.error("Error rendering amenity analysis:", e);
+                        $('#amenityAnalysisChart').html('<div class="alert alert-danger">Error loading amenity analysis chart</div>');
+                    }
+                }).fail(function() {
+                    $('#amenityAnalysisChart').html('<div class="alert alert-danger">Failed to load amenity data</div>');
+                });
+            });
         } );
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
