@@ -460,32 +460,32 @@ def scrape_url_data(google_url, chrome_install, chrome_options):
             socialMediaLinks = "N/A"
 
 
-        # emails - not included in scraping, 
-        if url != "N/A":
-            contact_page_urls = ["/about", "/contact", "/contact-us"]
-            for possible_path in contact_page_urls:
-                contact_page_url = url.rstrip("/") + possible_path
+        # emails - not included in scraping, as it is just guessing contact page for email extraction
+        #if url != "N/A":
+        #    contact_page_urls = ["/about", "/contact", "/contact-us"]
+        #    for possible_path in contact_page_urls:
+        #        contact_page_url = url.rstrip("/") + possible_path
             
-                try:
-                    driver.get("https://" + contact_page_url)  
-                    WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, "body"))) 
+        #        try:
+        #            driver.get("https://" + contact_page_url)  
+        #            WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, "body"))) 
                     
-                    html = driver.page_source
-                    soup = BeautifulSoup(html, 'html.parser') 
-                    text = soup.get_text()
-                    emails = re.findall(r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(?:\.[a-zA-Z]{2,})?", text)
+        #            html = driver.page_source
+        #            soup = BeautifulSoup(html, 'html.parser') 
+        #            text = soup.get_text()
+        #            emails = re.findall(r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(?:\.[a-zA-Z]{2,})?", text)
                     
-                    if emails:
-                        email = emails[0]
-                    else:
-                        email = "N/A"
+        #            if emails:
+        #                email = emails[0]
+        #            else:
+        #                email = "N/A"
                 
-                except Exception as e:
-                    socialMediaLinks = "N/A"                
-                    logger.error(f"socialMediaLinks: {e}")
-                    logger.error(f"socialMediaLinks: {e.__traceback__.tb_lineno}")
-        else:
-            email = "N/A"
+        #        except Exception as e:
+        #            socialMediaLinks = "N/A"                
+        #            logger.error(f"socialMediaLinks: {e}")
+        #            logger.error(f"socialMediaLinks: {e.__traceback__.tb_lineno}")
+        #else:
+        #    email = "N/A"
 
         driver.quit() #Quit driver after usage
 
@@ -504,8 +504,8 @@ def scrape_url_data(google_url, chrome_install, chrome_options):
             "otaLinks": otaLinks,
             "averageOtaPrice": averageOtaPrice,
             "socialMediaLinks": socialMediaLinks,
-            "workingHours": workingHours,
-            "email": email
+            "workingHours": workingHours
+            #"email": email
         }
 
     except Exception as e:
@@ -541,6 +541,10 @@ def perform_scraping():
         logger.error(f"Error setting chrome: {e}")
         exit()
 
+    # It is much easier to use Google maps API, parameterized search including lat, lng, radius of search, and also JSON is much easier to handle in app instead of plain scraping with Selenium and ChromeDriver :)
+    # Also, this was intended to use search_query, but for ease of use, url that is used is url for nearby hotels provided by your url.
+    # Could have used Google Places API, but that does not come for free. Check pricing here: https://developers.google.com/maps/documentation/places/web-service/usage-and-billing
+    # Probably with this amount of API calls it is free, but from 100.000 calls/maps load it become costly. Depends on requirements, scale etc.
     driver.get("https://www.google.com/maps/search/Hotels/@30.3736662,-86.5128752,12z/data=!4m5!2m4!5m3!5m2!1s2025-03-01!2i3?authuser=0&entry=ttu&g_ep=EgoyMDI1MDIyNi4xIKXMDSoASAFQAw%3D%3D")
 
     try:
