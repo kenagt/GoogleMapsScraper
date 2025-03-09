@@ -460,10 +460,12 @@ def scrape_url_data(google_url, chrome_install, chrome_options):
             socialMediaLinks = "N/A"
 
 
-        # emails - not included in scraping, as it is just guessing contact page for email extraction
+        # emails - It is connected to email and Google Places API. 
+        # I have included into scraping now, but it is not used (commented out).  
+        # Scraping emails is not an issue, but guessing contact page is, so results may vary.
         #if url != "N/A":
-        #    contact_page_urls = ["/about", "/contact", "/contact-us"]
-        #    for possible_path in contact_page_urls:
+        #    possible_contact_page_urls = ["/about", "/contact", "/contact-us"]
+        #    for possible_path in possible_contact_page_urls:
         #        contact_page_url = url.rstrip("/") + possible_path
             
         #        try:
@@ -481,9 +483,9 @@ def scrape_url_data(google_url, chrome_install, chrome_options):
         #                email = "N/A"
                 
         #        except Exception as e:
-        #            socialMediaLinks = "N/A"                
-        #            logger.error(f"socialMediaLinks: {e}")
-        #            logger.error(f"socialMediaLinks: {e.__traceback__.tb_lineno}")
+        #            emails = "N/A"                
+        #            logger.error(f"emails: {e}")
+        #            logger.error(f"emails: {e.__traceback__.tb_lineno}")
         #else:
         #    email = "N/A"
 
