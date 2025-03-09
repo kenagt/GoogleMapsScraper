@@ -431,6 +431,8 @@ def scrape_url_data(google_url, chrome_install, chrome_options):
 
         # Social media links
         if url != "N/A":
+            contact_page_urls = ["/about", "/en/contact", "/en/contact-us", "/contact", "/contact-us"]
+
             try:
                 driver.get("https://" + url)  
                 WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, "body"))) 
@@ -457,6 +459,34 @@ def scrape_url_data(google_url, chrome_install, chrome_options):
         else:
             socialMediaLinks = "N/A"
 
+
+        # emails - not included in scraping, 
+        if url != "N/A":
+            contact_page_urls = ["/about", "/contact", "/contact-us"]
+            for possible_path in contact_page_urls:
+                contact_page_url = url.rstrip("/") + possible_path
+            
+                try:
+                    driver.get("https://" + contact_page_url)  
+                    WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, "body"))) 
+                    
+                    html = driver.page_source
+                    soup = BeautifulSoup(html, 'html.parser') 
+                    text = soup.get_text()
+                    emails = re.findall(r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(?:\.[a-zA-Z]{2,})?", text)
+                    
+                    if emails:
+                        email = emails[0]
+                    else:
+                        email = "N/A"
+                
+                except Exception as e:
+                    socialMediaLinks = "N/A"                
+                    logger.error(f"socialMediaLinks: {e}")
+                    logger.error(f"socialMediaLinks: {e.__traceback__.tb_lineno}")
+        else:
+            email = "N/A"
+
         driver.quit() #Quit driver after usage
 
         logger.info(f"Finished scraping URL: {google_url}")
@@ -474,13 +504,15 @@ def scrape_url_data(google_url, chrome_install, chrome_options):
             "otaLinks": otaLinks,
             "averageOtaPrice": averageOtaPrice,
             "socialMediaLinks": socialMediaLinks,
-            "workingHours": workingHours
+            "workingHours": workingHours,
+            "email": email
         }
 
     except Exception as e:
         logger.error(f"Error scraping : {e}")
         logger.error(f"Error scraping : {e.__traceback__.tb_lineno}")
         return None
+
 
 def perform_scraping():
     """Main scraping function."""
