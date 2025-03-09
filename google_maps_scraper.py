@@ -459,7 +459,6 @@ def scrape_url_data(google_url, chrome_install, chrome_options):
         else:
             socialMediaLinks = "N/A"
 
-
         # emails - It is connected to email and Google Places API. 
         # I have included into scraping now, but it is not used (commented out).  
         # Scraping emails is not an issue, but guessing contact page is, so results may vary.
@@ -543,10 +542,14 @@ def perform_scraping():
         logger.error(f"Error setting chrome: {e}")
         exit()
 
-    # It is much easier to use Google maps API, parameterized search including lat, lng, radius of search, and also JSON is much easier to handle in app instead of plain scraping with Selenium and ChromeDriver :)
+    # It is much easier to use Google maps API, parameterized search like lat, lng, radius of search etc.
+    # Also JSON is much easier to handle in app instead of plain scraping with Selenium and ChromeDriver :)
     # Also, this was intended to use search_query, but for ease of use, url that is used is url for nearby hotels provided by your url.
     # Could have used Google Places API, but that does not come for free. Check pricing here: https://developers.google.com/maps/documentation/places/web-service/usage-and-billing
-    # Probably with this amount of API calls it is free, but from 100.000 calls/maps load it become costly. Depends on requirements, scale etc.
+    # Probably with this small amount of API calls it is free, but from 100.000 calls/maps and above, it becomes costly.
+    # So I did not opted for Google Maps API solution, and I have moved with plain scraping using Selenium and ChromeDriver.
+    # It is harder to scrape data, then to fetch through API, but this depends on company policies, budget, requirements etc.
+    # Most of scraping I have done this way, just like most of AI companies did :)
     driver.get("https://www.google.com/maps/search/Hotels/@30.3736662,-86.5128752,12z/data=!4m5!2m4!5m3!5m2!1s2025-03-01!2i3?authuser=0&entry=ttu&g_ep=EgoyMDI1MDIyNi4xIKXMDSoASAFQAw%3D%3D")
 
     try:
