@@ -1,0 +1,140 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Location-based Search</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/style.css">
+    <style>
+        #map {
+            height: 500px;
+            width: 100%;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .map-container {
+            padding: 20px;
+            background-color: var(--bs-body-bg);
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .coordinates-display {
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+           <h1 class="d-flex align-items-center">
+               <i class="fas fa-map-marker-alt scraper-icon me-2"></i>
+               Location-based Search
+           </h1>
+           <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">
+               <i class="fas fa-home me-2"></i> Back to Home
+           </a>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h5>Select a Location on the Map</h5>
+            </div>
+            <div class="card-body">
+                <p class="mb-3">Click on the map to select a location for your hotel search. You can also adjust the search parameters below.</p>
+                
+                <div class="map-container">
+                    <div id="map"></div>
+                    <div class="coordinates-display" id="selected-location">
+                        <p><strong>Selected Location:</strong> No location selected</p>
+                    </div>
+                </div>
+                
+                <form action="{{ url_for('start_map_search') }}" method="post" id="mapSearchForm">
+                    <input type="hidden" id="latitude" name="latitude" value="">
+                    <input type="hidden" id="longitude" name="longitude" value="">
+                    
+                    <div class="mb-3">
+                        <label for="query" class="form-label">Search Query</label>
+                        <input type="text" class="form-control" id="query" name="query" placeholder="e.g., hotels" value="hotels" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="radius" class="form-label">Search Radius (meters)</label>
+                        <input type="number" class="form-control" id="radius" name="radius" value="5000" min="1000" max="50000">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="max_results" class="form-label">Maximum Results</label>
+                        <input type="number" class="form-control" id="max_results" name="max_results" value="20" min="5" max="100">
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary" id="searchBtn" disabled>
+                        <i class="fas fa-search me-2"></i> Search this Location
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let map;
+        let marker;
+        
+        function initMap() {
+            // Default location (centered on Destin, Florida)
+            const defaultLocation = { lat: 30.393534, lng: -86.495783 };
+            
+            // Create map centered at the default location
+            map = new google.maps.Map(document.getElementById("map"), {
+                zoom: 12,
+                center: defaultLocation,
+                mapTypeControl: true,
+                streetViewControl: false,
+                fullscreenControl: true,
+            });
+            
+            // Add click event listener to the map
+            map.addListener("click", (event) => {
+                placeMarker(event.latLng);
+            });
+        }
+        
+        function placeMarker(location) {
+            // Remove existing marker if any
+            if (marker) {
+                marker.setMap(null);
+            }
+            
+            // Create new marker
+            marker = new google.maps.Marker({
+                position: location,
+                map: map,
+                animation: google.maps.Animation.DROP
+            });
+            
+            // Update form values with selected coordinates
+            document.getElementById("latitude").value = location.lat();
+            document.getElementById("longitude").value = location.lng();
+            
+            // Update the display text
+            document.getElementById("selected-location").innerHTML = 
+                `<p><strong>Selected Location:</strong> Latitude: ${location.lat().toFixed(6)}, Longitude: ${location.lng().toFixed(6)}</p>`;
+            
+            // Enable the search button
+            document.getElementById("searchBtn").disabled = false;
+        }
+    </script>
+    
+    <!-- Google Maps JavaScript API -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=&callback=initMap" async defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,7 +1,7 @@
 import os
 import threading
 import pandas as pd
-from flask import Flask, render_template, redirect, url_for, flash, request, send_file, session
+from flask import Flask, render_template, redirect, url_for, flash, request, send_file, session, jsonify
 # Import your scraper functions (perform_scraping, etc.)
 from google_maps_scraper import perform_scraping  # Replace with your actual file
 import json
@@ -96,6 +96,41 @@ def search():
         return redirect(url_for('start_scraping_with_params'))
     
     return render_template('search_form.html')
+
+@app.route('/map_search')
+def map_search():
+    """Show the map-based search interface"""
+    return render_template('map_search.html')
+
+@app.route('/start_map_search', methods=['POST'])
+def start_map_search():
+    """Handle map-based search form submission"""
+    if request.method == 'POST':
+        # Get form data
+        query = request.form.get('query', 'Hotels')
+        latitude = request.form.get('latitude', '')
+        longitude = request.form.get('longitude', '')
+        radius = int(request.form.get('radius', 5000))
+        max_results = int(request.form.get('max_results', 20))
+        
+        # Validate coordinates
+        if not latitude or not longitude:
+            flash("Please select a location on the map.", 'warning')
+            return redirect(url_for('map_search'))
+        
+        # Save search parameters in session
+        session['search_params'] = {
+            'query': query,
+            'latitude': latitude,
+            'longitude': longitude,
+            'radius': radius,
+            'max_results': max_results
+        }
+        
+        # Start scraping with the provided parameters
+        return redirect(url_for('start_scraping_with_params'))
+    
+    return redirect(url_for('map_search'))
 
 @app.route('/start_scraping')
 def start_scraping():
