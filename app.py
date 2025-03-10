@@ -1,7 +1,7 @@
 import os
 import threading
 import pandas as pd
-from flask import Flask, render_template, redirect, url_for, flash, request, send_file
+from flask import Flask, render_template, redirect, url_for, flash, request, send_file, session
 # Import your scraper functions (perform_scraping, etc.)
 from google_maps_scraper import perform_scraping  # Replace with your actual file
 import json
@@ -47,6 +47,92 @@ def read_csv_data(filename):
         return []
 
 
+@app.route('/')
+def index():
+    data = read_csv_data(CSV_FILE)
+    rating_distribution_json = create_rating_distribution_chart()
+    price_distribution_json = create_price_distribution_chart()
+    market_positioning_json = create_market_positioning_chart()
+
+    # Get amenity analysis and hotel names
+    amenity_analysis_json, hotels_with_amenities = create_amenity_gap_analysis()
+
+    return render_template('index.html',
+                           data=data,
+                           scraping_in_progress=scraping_in_progress,
+                           rating_distribution_json=rating_distribution_json,
+                           price_distribution_json=price_distribution_json,
+                           market_positioning_json=market_positioning_json,
+                           amenity_analysis_json=amenity_analysis_json,
+                           hotels_with_amenities=hotels_with_amenities)
+
+@app.route('/search', methods=['GET', 'POST'])
+def search():
+    if request.method == 'POST':
+        # Get form data
+        query = request.form.get('query', 'Hotels')
+        latitude = request.form.get('latitude', '')
+        longitude = request.form.get('longitude', '')
+        radius = int(request.form.get('radius', 5000))
+        max_results = int(request.form.get('max_results', 20))
+        
+        # Save search parameters in session
+        session['search_params'] = {
+            'query': query,
+            'latitude': latitude,
+            'longitude': longitude,
+            'radius': radius,
+            'max_results': max_results
+        }
+        
+        location = None
+        if latitude and longitude:
+            try:
+                location = (float(latitude), float(longitude))
+            except ValueError:
+                flash("Invalid coordinates. Using search query only.", 'warning')
+        
+        # Start scraping with the provided parameters
+        return redirect(url_for('start_scraping_with_params'))
+    
+    return render_template('search_form.html')
+
+@app.route('/start_scraping')
+def start_scraping():
+    global scraping_in_progress
+    if not scraping_in_progress:
+        scraping_in_progress = True
+        flash("Scraping started. Please wait...", 'info')
+        # Run scraping in a separate thread
+        scraping_thread = threading.Thread(target=run_scraping)
+        scraping_thread.daemon = True  # Allow app to exit even if thread is running
+        scraping_thread.start()
+    else:
+        flash("Scraping is already in progress.", 'warning')
+    return redirect(url_for('index'))
+
+@app.route('/start_scraping_with_params')
+def start_scraping_with_params():
+    global scraping_in_progress
+    if not scraping_in_progress:
+        scraping_in_progress = True
+        flash("Scraping started with your parameters. Please wait...", 'info')
+        
+        # Get search parameters from session
+        search_params = session.get('search_params', {})
+        
+        # Run scraping in a separate thread
+        scraping_thread = threading.Thread(
+            target=run_scraping_with_params,
+            kwargs=search_params
+        )
+        scraping_thread.daemon = True
+        scraping_thread.start()
+    else:
+        flash("Scraping is already in progress.", 'warning')
+    return redirect(url_for('index'))
+
+
 def run_scraping():
     """Wrapper function to run the scraping and update the flag."""
     global scraping_in_progress
@@ -59,6 +145,60 @@ def run_scraping():
         app.logger.error("Scraping error:", exc_info=True)
     finally:
         scraping_in_progress = False  # Reset flag
+
+def run_scraping_with_params(query="Hotels", latitude="", longitude="", radius=5000, max_results=20):
+    """Wrapper function to run the scraping with custom parameters."""
+    global scraping_in_progress
+    try:
+        location = None
+        if latitude and longitude:
+            try:
+                location = (float(latitude), float(longitude))
+            except ValueError:
+                app.logger.error("Invalid coordinates")
+                
+        success = perform_scraping(
+            search_query=query,
+            location=location,
+            radius=radius,
+            max_results=max_results
+        )
+        
+        if success:
+            flash("Scraping finished successfully!", 'success')
+        else:
+            flash("Scraping completed with some errors. Check logs for details.", 'warning')
+    except Exception as e:
+        flash(f"Scraping failed: {str(e)}", 'danger')
+        app.logger.error("Scraping error:", exc_info=True)
+    finally:
+        scraping_in_progress = False  # Reset flag
+
+@app.route('/export/<format>')
+def export_data(format):
+    """Export data in various formats"""
+    if format == 'csv':
+        return send_file(CSV_FILE, 
+                        mimetype='text/csv',
+                        download_name='hotel_data.csv',
+                        as_attachment=True)
+    elif format == 'json':
+        return send_file(JSON_FILE,
+                        mimetype='application/json',
+                        download_name='hotel_data.json',
+                        as_attachment=True)
+    elif format == 'excel':
+        # Convert data to Excel
+        df = pd.read_csv(CSV_FILE)
+        excel_file = "hotel_data.xlsx"
+        df.to_excel(excel_file, index=False)
+        return send_file(excel_file,
+                        mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                        download_name='hotel_data.xlsx',
+                        as_attachment=True)
+    else:
+        flash(f"Unsupported export format: {format}", 'danger')
+        return redirect(url_for('index'))
 
 
 # --- Chart creation functions ---
@@ -816,71 +956,6 @@ def create_value_comparison(hotel_data):
                                   x=1))
 
     return pio.to_json(fig)
-
-
-@app.route('/')
-def index():
-    data = read_csv_data(CSV_FILE)
-    rating_distribution_json = create_rating_distribution_chart()
-    price_distribution_json = create_price_distribution_chart()
-    market_positioning_json = create_market_positioning_chart()
-
-    # Get amenity analysis and hotel names
-    amenity_analysis_json, hotels_with_amenities = create_amenity_gap_analysis(
-    )
-
-    return render_template('index.html',
-                           data=data,
-                           scraping_in_progress=scraping_in_progress,
-                           rating_distribution_json=rating_distribution_json,
-                           price_distribution_json=price_distribution_json,
-                           market_positioning_json=market_positioning_json,
-                           amenity_analysis_json=amenity_analysis_json,
-                           hotels_with_amenities=hotels_with_amenities)
-
-
-@app.route('/start_scraping')
-def start_scraping():
-    global scraping_in_progress
-    if not scraping_in_progress:
-        scraping_in_progress = True
-        flash("Scraping started. Please wait...", 'info')
-        # Run scraping in a separate thread
-        scraping_thread = threading.Thread(target=run_scraping)
-        scraping_thread.daemon = True  # Allow app to exit even if thread is running
-        scraping_thread.start()
-    else:
-        flash("Scraping is already in progress.", 'warning')
-    return redirect(url_for('index'))
-
-
-@app.route('/export/<format>')
-def export_data(format):
-    """Export data in various formats"""
-    if format == 'csv':
-        return send_file(CSV_FILE,
-                         mimetype='text/csv',
-                         download_name='hotel_data.csv',
-                         as_attachment=True)
-    elif format == 'json':
-        return send_file(JSON_FILE,
-                         mimetype='application/json',
-                         download_name='hotel_data.json',
-                         as_attachment=True)
-    elif format == 'excel':
-        # Convert data to Excel
-        df = pd.read_csv(CSV_FILE)
-        excel_file = "hotel_data.xlsx"
-        df.to_excel(excel_file, index=False)
-        return send_file(
-            excel_file,
-            mimetype=
-            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            download_name='hotel_data.xlsx',
-            as_attachment=True)
-    else:
-        flash(f"Unsupported export format: {format}", 'danger')
-        return redirect(url_for('index'))
 
 
 @app.route('/amenity_analysis')
