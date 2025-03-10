@@ -157,17 +157,13 @@ def run_scraping_with_params(query="Hotels", latitude="", longitude="", radius=5
             except ValueError:
                 app.logger.error("Invalid coordinates")
                 
-        success = perform_scraping(
+        perform_scraping(
             search_query=query,
             location=location,
             radius=radius,
             max_results=max_results
         )
-        
-        if success:
-            flash("Scraping finished successfully!", 'success')
-        else:
-            flash("Scraping completed with some errors. Check logs for details.", 'warning')
+        flash("Scraping finished!", 'success')        
     except Exception as e:
         flash(f"Scraping failed: {str(e)}", 'danger')
         app.logger.error("Scraping error:", exc_info=True)

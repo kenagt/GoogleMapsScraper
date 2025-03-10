@@ -99,39 +99,7 @@ def write_to_json(data, filename):
         logger.error(f"Error writing to JSON file: {e}")
 
 
-def scrape_google_maps_urls(search_query, driver):
-    if search_query is not None:
-        try:
-            search_box = WebDriverWait(driver, 10).until(
-                EC.presence_of_element_located((By.ID, 'searchboxinput')))
-
-            # Type the search query and press Enter
-            search_box.send_keys(search_query)
-            search_box.send_keys(Keys.RETURN)
-
-            # Wait for the search results to load
-            WebDriverWait(driver, 10).until(
-                EC.presence_of_element_located((By.CLASS_NAME, 'hfpxzc')))
-        except Exception as e:
-            logger.error(f"An error occurred: {e}")
-            logger.error(f"An error occurred: {e.__traceback__.tb_lineno}")
-            # If an exception occurs, retry the code block after a short delay
-            time.sleep(5)
-            try:
-                search_box = WebDriverWait(driver, 10).until(
-                    EC.presence_of_element_located((By.ID, 'searchboxinput')))
-                search_box.send_keys(search_query)
-                search_box.send_keys(Keys.RETURN)
-
-                WebDriverWait(driver, 10).until(
-                    EC.presence_of_element_located((By.CLASS_NAME, 'hfpxzc')))
-            except Exception as e:
-                # If the problem persists, print an error message and exit the script
-                logger.error(f"An error occurred: {e}")
-                logger.error(f"An error occurred: {e.__traceback__.tb_lineno}")
-                driver.quit()
-                exit()
-
+def scrape_google_maps_urls(driver):
     # Google maps and results are successfully loaded
     # Initialize the output list
     urls = []
@@ -553,7 +521,7 @@ def perform_scraping(search_query=None,
     driver.get(maps_url)
 
     try:
-        urls = scrape_google_maps_urls(search_query, driver)
+        urls = scrape_google_maps_urls(driver)
 
         # Limit the number of URLs to process
         if max_results and max_results < len(urls):
