@@ -394,6 +394,8 @@ def scrape_url_data(google_url, chrome_options):
 
         # Social media links
         if url != "N/A":
+            contact_page_urls = ["/about", "/en/contact", "/en/contact-us", "/contact", "/contact-us"]
+
             try:
                 driver.get("https://" + url)
                 WebDriverWait(driver, 10).until(
@@ -472,6 +474,7 @@ def scrape_url_data(google_url, chrome_options):
             "averageOtaPrice": averageOtaPrice,
             "socialMediaLinks": socialMediaLinks,
             "workingHours": workingHours
+            #"email": email
             #"email": email
         }
 

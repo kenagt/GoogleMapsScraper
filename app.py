@@ -47,6 +47,7 @@ def read_csv_data(filename):
         print(f"Error reading CSV file: {e}")
         return []
 
+
 @app.route('/')
 def index():
     data = read_csv_data(CSV_FILE)
@@ -55,7 +56,8 @@ def index():
     market_positioning_json = create_market_positioning_chart()
 
     # Get amenity analysis and hotel names
-    amenity_analysis_json, hotels_with_amenities = create_amenity_gap_analysis()
+    amenity_analysis_json, hotels_with_amenities = create_amenity_gap_analysis(
+    )
 
     return render_template('index.html',
                            data=data,
@@ -65,6 +67,7 @@ def index():
                            market_positioning_json=market_positioning_json,
                            amenity_analysis_json=amenity_analysis_json,
                            hotels_with_amenities=hotels_with_amenities)
+
 
 @app.route('/start_scraping')
 def start_scraping():
@@ -80,11 +83,13 @@ def start_scraping():
         flash("Scraping is already in progress.", 'warning')
     return redirect(url_for('index'))
 
+
 @app.route('/amenity_analysis')
 def amenity_analysis():
     hotel_name = request.args.get('hotel_name', None)
     analysis_json, _ = create_amenity_gap_analysis(hotel_name)
     return analysis_json
+
 
 def run_scraping():
     """Wrapper function to run the scraping and update the flag."""
@@ -98,6 +103,7 @@ def run_scraping():
         app.logger.error("Scraping error:", exc_info=True)
     finally:
         scraping_in_progress = False  # Reset flag
+
 
 # --- Chart creation functions ---
 def create_rating_distribution_chart():
@@ -144,6 +150,7 @@ def create_rating_distribution_chart():
         height=500,
     )
     return pio.to_json(fig)
+
 
 def create_price_distribution_chart():
     """Creates a Plotly pie chart for price distribution."""
@@ -199,6 +206,7 @@ def create_price_distribution_chart():
 
     return pio.to_json(fig)
 
+
 def create_market_positioning_chart():
     """Creates a Plotly scatter plot for market positioning (price vs. quality)."""
     global scraped_data
@@ -221,7 +229,7 @@ def create_market_positioning_chart():
             price = float(price.replace(",", "."))
             rating = float(rating.replace(",", "."))
             data_points.append({
-                "name": name,
+                "name": name.replace("'", ""),
                 "price": price,
                 "rating": rating
             })
@@ -311,6 +319,7 @@ def create_market_positioning_chart():
 
     return pio.to_json(fig)
 
+
 def create_amenity_gap_analysis(hotel_name=None):
     """
     Creates a Plotly visualization for amenity gap analysis.
@@ -380,7 +389,8 @@ def create_amenity_gap_analysis(hotel_name=None):
 
     # Calculate percentage of competitors with each amenity
     amenity_percentages = {
-        amenity: (count / total_competitors) * 100 if total_competitors > 0 else 0
+        amenity:
+        (count / total_competitors) * 100 if total_competitors > 0 else 0
         for amenity, count in amenity_counts.items()
     }
 
@@ -516,30 +526,31 @@ def create_amenity_gap_analysis(hotel_name=None):
 
     return pio.to_json(fig), hotel_names
 
+
 @app.route('/hotel_comparison')
 def hotel_comparison():
     """
     Generate comparison data for selected hotels based on the comparison type.
     """
     global scraped_data
-    
+
     # Get request parameters
     hotels_json = request.args.get('hotels', '[]')
     comparison_type = request.args.get('comparison_type', 'bar')
-    
+
     try:
         selected_hotels = json.loads(hotels_json)
-        
+
         # Validate input
         if not selected_hotels or len(selected_hotels) < 2:
             return json.dumps({"error": "Please select at least 2 hotels"})
-        
+
         # Get data for selected hotels
         hotel_data = []
         for hotel in scraped_data:
             if hotel['name'] in selected_hotels:
                 hotel_data.append(hotel)
-        
+
         # Generate the appropriate chart based on comparison type
         if comparison_type == 'bar':
             return create_bar_comparison(hotel_data)
@@ -551,10 +562,11 @@ def hotel_comparison():
             return create_value_comparison(hotel_data)
         else:
             return json.dumps({"error": "Invalid comparison type"})
-    
+
     except Exception as e:
         app.logger.error(f"Comparison error: {str(e)}", exc_info=True)
         return json.dumps({"error": str(e)})
+
 
 def create_bar_comparison(hotel_data):
     """
@@ -566,25 +578,25 @@ def create_bar_comparison(hotel_data):
         'averageOtaPrice': 'Average Price ($)',
         'numberOfReviews': 'Number of Reviews',
     }
-    
+
     # Extract hotel names
     hotel_names = [hotel['name'] for hotel in hotel_data]
-    
+
     # Create figure with subplots
     fig = go.Figure()
-    
+
     # Add a trace for each metric
     for metric_key, metric_name in metrics.items():
         metric_values = []
-        
+
         for hotel in hotel_data:
             value = hotel.get(metric_key, 'N/A')
-            
+
             # Handle N/A values
             if value == 'N/A':
                 metric_values.append(0)
                 continue
-            
+
             # Convert to float and handle different formats
             try:
                 if isinstance(value, str):
@@ -592,7 +604,7 @@ def create_bar_comparison(hotel_data):
                 metric_values.append(float(value))
             except (ValueError, TypeError):
                 metric_values.append(0)
-        
+
         # Add bar for this metric
         fig.add_trace(
             go.Bar(
@@ -600,28 +612,23 @@ def create_bar_comparison(hotel_data):
                 y=metric_values,
                 name=metric_name,
                 text=[f"{v:.1f}" if v > 0 else 'N/A' for v in metric_values],
-                textposition='auto'
-            )
-        )
-    
+                textposition='auto'))
+
     # Update layout
-    fig.update_layout(
-        title="Hotel Key Metrics Comparison",
-        xaxis_title="Hotels",
-        yaxis_title="Values",
-        barmode='group',
-        template="plotly_white",
-        height=500,
-        legend=dict(
-            orientation="h",
-            yanchor="bottom",
-            y=1.02,
-            xanchor="right",
-            x=1
-        )
-    )
-    
+    fig.update_layout(title="Hotel Key Metrics Comparison",
+                      xaxis_title="Hotels",
+                      yaxis_title="Values",
+                      barmode='group',
+                      template="plotly_white",
+                      height=500,
+                      legend=dict(orientation="h",
+                                  yanchor="bottom",
+                                  y=1.02,
+                                  xanchor="right",
+                                  x=1))
+
     return pio.to_json(fig)
+
 
 def create_radar_comparison(hotel_data):
     """
@@ -633,7 +640,7 @@ def create_radar_comparison(hotel_data):
         'numberOfReviews': 'Review Count',
         'averageOtaPrice': 'Price',
     }
-    
+
     # Add amenities count if available
     for hotel in hotel_data:
         if 'amenities' in hotel and hotel['amenities'] != 'N/A':
@@ -642,12 +649,12 @@ def create_radar_comparison(hotel_data):
             hotel['amenities_count'] = len(amenities)
         else:
             hotel['amenities_count'] = 0
-    
+
     metrics['amenities_count'] = 'Amenities Count'
-    
+
     # Normalize all metrics to a 0-10 scale
     normalized_data = []
-    
+
     # First pass: get min/max for each metric
     metric_ranges = {}
     for metric in metrics.keys():
@@ -661,31 +668,31 @@ def create_radar_comparison(hotel_data):
                     values.append(float(value))
                 except (ValueError, TypeError):
                     pass
-        
+
         if values:
-            metric_ranges[metric] = {
-                'min': min(values),
-                'max': max(values)
-            }
+            metric_ranges[metric] = {'min': min(values), 'max': max(values)}
         else:
-            metric_ranges[metric] = {'min': 0, 'max': 1}  # Avoid division by zero
-    
+            metric_ranges[metric] = {
+                'min': 0,
+                'max': 1
+            }  # Avoid division by zero
+
     # Second pass: normalize the data
     for hotel in hotel_data:
         hotel_normalized = {'name': hotel['name']}
-        
+
         for metric, display_name in metrics.items():
             value = hotel.get(metric, 'N/A')
-            
+
             if value == 'N/A':
                 hotel_normalized[metric] = 0
                 continue
-            
+
             try:
                 if isinstance(value, str):
                     value = value.replace(',', '.')
                 value = float(value)
-                
+
                 # Special handling for price (inverse normalization - lower is better)
                 if metric == 'averageOtaPrice':
                     min_val = metric_ranges[metric]['min']
@@ -693,7 +700,8 @@ def create_radar_comparison(hotel_data):
                     if max_val == min_val:
                         normalized = 5  # If all same price, give middle value
                     else:
-                        normalized = 10 - (((value - min_val) / (max_val - min_val)) * 10)
+                        normalized = 10 - (((value - min_val) /
+                                            (max_val - min_val)) * 10)
                 else:
                     # Normal normalization (higher is better)
                     min_val = metric_ranges[metric]['min']
@@ -701,50 +709,44 @@ def create_radar_comparison(hotel_data):
                     if max_val == min_val:
                         normalized = 5  # If all values same, give middle value
                     else:
-                        normalized = ((value - min_val) / (max_val - min_val)) * 10
-                
+                        normalized = ((value - min_val) /
+                                      (max_val - min_val)) * 10
+
                 hotel_normalized[metric] = normalized
             except (ValueError, TypeError):
                 hotel_normalized[metric] = 0
-        
+
         normalized_data.append(hotel_normalized)
-    
+
     # Create the radar chart
     fig = go.Figure()
-    
+
     # Prepare the categories (theta axis)
     categories = list(metrics.values())
-    
+
     # Add a trace for each hotel
     for hotel in normalized_data:
         values = [hotel[metric] for metric in metrics.keys()]
         # Add the first value again to close the loop
         values.append(values[0])
         categories_closed = categories + [categories[0]]
-        
-        fig.add_trace(go.Scatterpolar(
-            r=values,
-            theta=categories_closed,
-            fill='toself',
-            name=hotel['name']
-        ))
-    
+
+        fig.add_trace(
+            go.Scatterpolar(r=values,
+                            theta=categories_closed,
+                            fill='toself',
+                            name=hotel['name']))
+
     # Update layout
-    fig.update_layout(
-        title="Hotel Performance Radar Chart",
-        polar=dict(
-            radialaxis=dict(
-                visible=True,
-                range=[0, 10]
-            )
-        ),
-        template="plotly_white",
-        height=500,
-        width=700,
-        showlegend=True
-    )
-    
+    fig.update_layout(title="Hotel Performance Radar Chart",
+                      polar=dict(radialaxis=dict(visible=True, range=[0, 10])),
+                      template="plotly_white",
+                      height=500,
+                      width=700,
+                      showlegend=True)
+
     return pio.to_json(fig)
+
 
 def create_amenities_comparison(hotel_data):
     """
@@ -753,7 +755,7 @@ def create_amenities_comparison(hotel_data):
     # Extract amenities for each hotel
     hotel_amenities = {}
     all_amenities = set()
-    
+
     for hotel in hotel_data:
         name = hotel['name']
         if 'amenities' in hotel and hotel['amenities'] != 'N/A':
@@ -762,14 +764,14 @@ def create_amenities_comparison(hotel_data):
             all_amenities.update(amenities_list)
         else:
             hotel_amenities[name] = []
-    
+
     # Convert to sorted list
     all_amenities = sorted(list(all_amenities))
-    
+
     # Create heatmap data
     hotels = list(hotel_amenities.keys())
     z_data = []
-    
+
     for amenity in all_amenities:
         row = []
         for hotel in hotels:
@@ -778,69 +780,66 @@ def create_amenities_comparison(hotel_data):
             else:
                 row.append(0)  # Hotel doesn't have this amenity
         z_data.append(row)
-    
+
     # Create the heatmap
-    fig = go.Figure(data=go.Heatmap(
-        z=z_data,
-        x=hotels,
-        y=all_amenities,
-        colorscale=[[0, 'white'], [1, 'green']],
-        showscale=False
-    ))
-    
+    fig = go.Figure(
+        data=go.Heatmap(z=z_data,
+                        x=hotels,
+                        y=all_amenities,
+                        colorscale=[[0, 'indianred'], [1, 'green']],
+                        showscale=False))
+
     # Add annotations
     annotations = []
     for i, amenity in enumerate(all_amenities):
         for j, hotel in enumerate(hotels):
             if amenity in hotel_amenities[hotel]:
-                annotations.append(dict(
-                    x=hotel,
-                    y=amenity,
-                    text="✓",
-                    showarrow=False,
-                    font=dict(color="black")
-                ))
-    
+                annotations.append(
+                    dict(x=hotel,
+                         y=amenity,
+                         text="✓",
+                         showarrow=False,
+                         font=dict(color="black")))
+
     # Update layout
-    fig.update_layout(
-        title="Hotel Amenities Comparison",
-        height=max(500, 100 + 25 * len(all_amenities)),
-        width=900,
-        template="plotly_white",
-        annotations=annotations,
-        xaxis=dict(title="Hotels"),
-        yaxis=dict(title="Amenities")
-    )
-    
+    fig.update_layout(title="Hotel Amenities Comparison",
+                      height=max(500, 100 + 25 * len(all_amenities)),
+                      width=900,
+                      template="plotly_white",
+                      annotations=annotations,
+                      xaxis=dict(title="Hotels"),
+                      yaxis=dict(title="Amenities"))
+
     return pio.to_json(fig)
+
 
 def create_value_comparison(hotel_data):
     """
     Create a value for money comparison (rating vs price)
     """
     hotels = []
-    
+
     for hotel in hotel_data:
         name = hotel['name']
         rating = hotel.get('averageReviewScore', 'N/A')
         price = hotel.get('averageOtaPrice', 'N/A')
-        
+
         # Skip hotels with missing data
         if rating == 'N/A' or price == 'N/A':
             continue
-        
+
         try:
             if isinstance(rating, str):
                 rating = rating.replace(',', '.')
             if isinstance(price, str):
                 price = price.replace(',', '.')
-                
+
             rating = float(rating)
             price = float(price)
-            
+
             # Calculate value score (rating/price ratio)
             value_score = (rating / price) * 100
-            
+
             hotels.append({
                 'name': name,
                 'rating': rating,
@@ -849,66 +848,60 @@ def create_value_comparison(hotel_data):
             })
         except (ValueError, TypeError, ZeroDivisionError):
             continue
-    
+
     if not hotels:
         return json.dumps({"error": "No valid data for comparison"})
-    
+
     # Sort by value score (descending)
     hotels.sort(key=lambda x: x['value_score'], reverse=True)
-    
+
     # Create the chart
     fig = go.Figure()
-    
+
     # Add bar chart for value scores
-    fig.add_trace(go.Bar(
-        x=[h['name'] for h in hotels],
-        y=[h['value_score'] for h in hotels],
-        marker_color='blue',
-        name='Value Score',
-        text=[f"{score:.2f}" for score in [h['value_score'] for h in hotels]],
-        textposition='auto'
-    ))
-    
+    fig.add_trace(
+        go.Bar(x=[h['name'] for h in hotels],
+               y=[h['value_score'] for h in hotels],
+               marker_color='blue',
+               name='Value Score',
+               text=[
+                   f"{score:.2f}"
+                   for score in [h['value_score'] for h in hotels]
+               ],
+               textposition='auto'))
+
     # Add line chart for ratings
-    fig.add_trace(go.Scatter(
-        x=[h['name'] for h in hotels],
-        y=[h['rating'] for h in hotels],
-        mode='lines+markers',
-        name='Rating',
-        yaxis='y2',
-        line=dict(color='green', width=3),
-        marker=dict(size=10)
-    ))
-    
+    fig.add_trace(
+        go.Scatter(x=[h['name'] for h in hotels],
+                   y=[h['rating'] for h in hotels],
+                   mode='lines+markers',
+                   name='Rating',
+                   yaxis='y2',
+                   line=dict(color='green', width=3),
+                   marker=dict(size=10)))
+
     # Update layout with dual y-axes
-    fig.update_layout(
-        title="Hotel Value for Money Analysis",
-        xaxis=dict(title="Hotels"),
-        yaxis=dict(
-            title="Value Score (Rating/Price × 100)",
-            side="left",
-            color="blue"
-        ),
-        yaxis2=dict(
-            title="Rating",
-            side="right",
-            overlaying="y",
-            range=[0, 5],
-            color="green"
-        ),
-        template="plotly_white",
-        height=500,
-        width=900,
-        legend=dict(
-            orientation="h",
-            yanchor="bottom",
-            y=1.02,
-            xanchor="right",
-            x=1
-        )
-    )
-    
+    fig.update_layout(title="Hotel Value for Money Analysis",
+                      xaxis=dict(title="Hotels"),
+                      yaxis=dict(title="Value Score (Rating/Price × 100)",
+                                 side="left",
+                                 color="blue"),
+                      yaxis2=dict(title="Rating",
+                                  side="right",
+                                  overlaying="y",
+                                  range=[0, 5],
+                                  color="green"),
+                      template="plotly_white",
+                      height=500,
+                      width=900,
+                      legend=dict(orientation="h",
+                                  yanchor="bottom",
+                                  y=1.02,
+                                  xanchor="right",
+                                  x=1))
+
     return pio.to_json(fig)
+
 
 if __name__ == '__main__':
     app.run(debug=True)
