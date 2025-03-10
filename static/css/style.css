@@ -84,14 +84,6 @@ table.dataTable thead th {
     }
 }
 
-#lightModeIcon {
-    color: #ffc107; /* yellow/gold for sun */
-}
-
-#darkModeIcon {
-    color: #6c757d; /* darker color for moon */
-}
-
 .scraper-icon {
     font-size: 2rem;
     color: #007bff;
@@ -113,6 +105,7 @@ table.dataTable thead th {
 }
 
 .modal-header {
+    background: var(--bs-tertiary-bg);
     border-bottom: none;
     padding: 1rem 1.5rem;
     border-top-left-radius: 15px;
@@ -239,7 +232,13 @@ display: none; /* Initially hide both icons */
 .form-label.dark-mode {
     color: #e0e0e0;
 }
+#lightModeIcon {
+    color: #ffc107; /* yellow/gold for sun */
+}
 
+#darkModeIcon {
+    color: #6c757d; /* darker color for moon */
+}
 
 /* Footer Styles */
 footer {
@@ -288,7 +287,25 @@ h1.dark-mode, .scraper-icon.dark-mode {
     color: var(--text-dark);
 }
 
-/* For setting up dark mode icon visibility */
+/* General styling */
+body {
+    transition: background-color 0.3s, color 0.3s;
+}
+
+html[data-bs-theme="dark"] {
+    --bs-body-bg: #212529;
+    --bs-body-color: #f8f9fa;
+}
+
+/* Dark mode styles */
+.dark-mode {
+    color: #f8f9fa !important;
+}
+
+.scraper-icon.dark-mode {
+    color: #f8f9fa;
+}
+
 .dark-mode-icon {
     display: none;
 }
@@ -305,60 +322,73 @@ footer {
 }
 
 footer.dark-mode {
-    border-top-color: #444;
+    border-top-color: var(--bs-body-bg);
 }
 
-.scraper-icon {
-    color: #0d6efd;
-    font-size: 1.5em;
-}
-
-/* For DataTables horizontal scrollbar */
+/* Making the table more responsive */
 .dataTables_scrollBodyWrapper {
     overflow-x: auto;
 }
 
+/* Modal styling */
 .modal-data-container {
-    margin-bottom: 15px;
-    padding-bottom: 15px;
-    border-bottom: 1px solid #eee;
+    margin-bottom: 1rem;
+    padding: 0.75rem;
+    border-radius: 0.375rem;
+    background-color: rgba(0, 0, 0, 0.03);
 }
 
-/* Map styles */
-.map-container {
-    position: relative;
+html[data-bs-theme="dark"] .modal-data-container {
+    background-color: rgba(255, 255, 255, 0.05);
 }
 
-#map {
+/* Footer Styles */
+footer {
+    background-color: #f8f9fa;
+    padding: 10px 0;
+    text-align: center;
+    border-top: 1px solid #dee2e6;
+    margin-top: 20px; /* Add some space above the footer */
+    transition: background-color 0.3s ease; /*Added transition for smooth change*/
+}
+
+footer.dark-mode{
+    background-color: var(--bs-body-bg);
+    color: var(--bg-light);
+}        
+
+.chart-container {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 10px;
+    width: 100%;          /* Still needed for responsiveness */
+    position: relative;   /* Still needed for aspect ratio */
+    margin-left: auto;  /* Center horizontally */
+    margin-right: auto; /* Center horizontally */
+}
+
+/* Search form styling */
+
+
+/* Badges for amenities */
+.badge {
+    font-size: 0.85rem;
+    font-weight: normal;
+    margin-right: 0.3rem;
+    margin-bottom: 0.3rem;
+}
+
+/* Custom button hover effects */
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     transition: all 0.3s ease;
 }
 
-#map:hover {
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-}
-
-.coordinates-display {
+.btn-success:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     transition: all 0.3s ease;
-}
-
-[data-bs-theme="dark"] .coordinates-display {
-    background-color: rgba(50, 50, 50, 0.8);
-    color: white;
-}
-
-/* Responsive improvements */
-@media (max-width: 768px) {
-    #map {
-        height: 300px;
-    }
-    
-    .btn-group {
-        flex-direction: column;
-        width: 100%;
-    }
-    
-    .btn-group .btn {
-        margin-bottom: 5px;
-        border-radius: 4px !important;
-    }
 }
