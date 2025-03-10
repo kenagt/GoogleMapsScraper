@@ -155,6 +155,7 @@ def scrape_url_data(google_url, chrome_options):
             options=chrome_options)  #Pass the chrome_options
         logger.info(f"Scraping URL: {google_url}")
         driver.get(google_url)
+
         WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.TAG_NAME, "body")))
 
@@ -247,7 +248,7 @@ def scrape_url_data(google_url, chrome_options):
                 'outerHTML')
             soup = BeautifulSoup(numberOfReviewsHtml, 'html.parser')
 
-            # Find all span elements with both 'fontBodySmall' and 'gSamH' classes
+            # Find all span elements
             spans = soup.find_all('span')
 
             # Extract the text content from each span and create a comma-separated string
@@ -284,8 +285,10 @@ def scrape_url_data(google_url, chrome_options):
                     (By.CSS_SELECTOR, "[data-item-id*='place-info-links:']")))
             checkInOutTimesHtml = checkInOutTimesElement.get_attribute(
                 'outerHTML')
+
             soup = BeautifulSoup(checkInOutTimesHtml, 'html.parser')
 
+            # Extract the text content from each span and create a comma-separated string
             spans = soup.find_all('span')
             checkInOutTimes = [span.text for span in spans]
             checkInOutTimes = [
@@ -304,11 +307,13 @@ def scrape_url_data(google_url, chrome_options):
         try:
             amenities_element = WebDriverWait(driver, 2).until(
                 EC.presence_of_element_located((By.CLASS_NAME, 'WKLD0c')))
+
             # Using Selenium's get_attribute('outerHTML')
             amenities_html = amenities_element.get_attribute('outerHTML')
 
             soup = BeautifulSoup(amenities_html, 'html.parser')
             spans = soup.find_all('span')
+
             # Extract the text content from each span and create a comma-separated string
             amenities = [clean_text(span.text) for span in spans]
             amenities = [s for s in amenities if s.strip()]
@@ -333,7 +338,7 @@ def scrape_url_data(google_url, chrome_options):
             numberOfOTAsHtml = driver.page_source
             soup = BeautifulSoup(numberOfOTAsHtml, 'html.parser')
 
-            # Find all span elements with both 'fontBodySmall' and 'gSamH' classes
+            # Find all span elements
             spans = soup.find_all('span', class_='QVR4f fontTitleSmall')
 
             # Extract the text content from each span and create a comma-separated string
@@ -348,18 +353,10 @@ def scrape_url_data(google_url, chrome_options):
 
         # OTA links
         try:
-            # Wait for the "Prices" tab and click it
-            #price_tab = WebDriverWait(driver, 10).until(
-            #    EC.element_to_be_clickable((By.XPATH, "//button[@class='hh2c6 ']"))
-            #)
-            #price_tab.click()
-            # Allow time for prices to load
-            #time.sleep(3)
-
             numberOfOTAsLinksHtml = driver.page_source
             soup = BeautifulSoup(numberOfOTAsLinksHtml, 'html.parser')
 
-            # Find all span elements with both 'fontBodySmall' and 'gSamH' classes
+            # Find all a elements
             atags = soup.find_all('a', class_='SlvSdc co54Ed')
             hrefs = [a['href'] for a in atags if 'href' in a.attrs]
 
@@ -376,7 +373,7 @@ def scrape_url_data(google_url, chrome_options):
         try:
             soup = BeautifulSoup(driver.page_source, 'html.parser')
 
-            # Find all span elements with both 'fontLabelMedium' and 'gSamH' classes
+            # Find all div elements
             divs = soup.find_all('div', class_='fontLabelMedium pUBf3e oiQUX')
 
             # Extract the text content from each span and create a comma-separated string
@@ -410,7 +407,7 @@ def scrape_url_data(google_url, chrome_options):
                 # Find all <a> tags with social media links
                 links = soup.find_all("a", href=social_media_pattern)
 
-                # Print the extracted links
+                # Extracted links
                 socialMediaLinks = [link["href"] for link in links]
                 socialMediaLinks = ", ".join(socialMediaLinks)
 
