@@ -36,15 +36,36 @@
           {% endif %}
         {% endwith %}
 
-        <div class="d-flex justify-content-start mb-3"> <!-- Changed to justify-content-start -->
-            {% if scraping_in_progress %}
-                <div class="alert alert-info">
-                    <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
-                    <span role="status">&nbsp;&nbsp;Scraping in progress</span>
-                </div>
-            {% else %}
-                <a href="{{ url_for('start_scraping') }}" class="btn btn-primary"><i class="fas fa-play me-2"></i> Start Scraping</a>
-            {% endif %}
+        <div class="d-flex justify-content-between mb-3">
+            <div>
+                {% if scraping_in_progress %}
+                    <div class="alert alert-info">
+                        <span class="spinner-grow spinner-grow-sm" aria-hidden="true"></span>
+                        <span role="status">&nbsp;&nbsp;Scraping in progress</span>
+                    </div>
+                {% else %}
+                    <div class="btn-group" role="group">
+                        <a href="{{ url_for('start_scraping') }}" class="btn btn-primary">
+                            <i class="fas fa-play me-2"></i> Quick Scrape
+                        </a>
+                        <a href="{{ url_for('search') }}" class="btn btn-success">
+                            <i class="fas fa-search me-2"></i> Custom Search
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- Export options -->
+            <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="exportDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-download me-2"></i> Export Data
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="exportDropdown">
+                    <li><a class="dropdown-item" href="{{ url_for('export_data', format='csv') }}">Export as CSV</a></li>
+                    <li><a class="dropdown-item" href="{{ url_for('export_data', format='json') }}">Export as JSON</a></li>
+                    <li><a class="dropdown-item" href="{{ url_for('export_data', format='excel') }}">Export as Excel</a></li>
+                </ul>
+            </div>
         </div>
 
         <!-- Chart Tabs -->
