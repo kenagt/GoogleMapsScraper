@@ -1,12 +1,15 @@
 import json
 import time
+import os
 import multiprocessing
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium.webdriver.chrome.options import Options  # Import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from webdriver_manager.chrome import ChromeDriverManager
 from bs4 import BeautifulSoup
 import re
 import pandas as pd
@@ -73,37 +76,30 @@ def is_open_24_hours(hours_text):
     return True
 
 
-def scrape_google_maps_urls(search_query, driver):
-    if search_query is not None:
-        try:
-            search_box = WebDriverWait(driver, 10).until(
-                EC.presence_of_element_located((By.ID, 'searchboxinput')))
+def write_to_csv():
+    # Load JSON file
+    json_file = "google_maps_results.json"  # Change to your JSON file path
+    df = pd.read_json(json_file)
 
-            # Type the search query and press Enter
-            search_box.send_keys(search_query)
-            search_box.send_keys(Keys.RETURN)
+    # Convert to CSV
+    csv_file = "google_maps_results.csv"
+    df.to_csv(csv_file, index=False)
 
-            # Wait for the search results to load
-            WebDriverWait(driver, 10).until(
-                EC.presence_of_element_located((By.CLASS_NAME, 'hfpxzc')))
-        except:
-            # If an exception occurs, retry the code block after a short delay
-            time.sleep(5)
-            try:
-                search_box = WebDriverWait(driver, 10).until(
-                    EC.presence_of_element_located((By.ID, 'searchboxinput')))
-                search_box.send_keys(search_query)
-                search_box.send_keys(Keys.RETURN)
+    logger.info(f"CSV file saved as {csv_file}")
 
-                WebDriverWait(driver, 10).until(
-                    EC.presence_of_element_located((By.CLASS_NAME, 'hfpxzc')))
-            except:
-                # If the problem persists, print an error message and exit the script
-                print("Error: Failed to load search results")
-                logger.error(f"Failed to load search results")
-                driver.quit()
-                exit()
 
+def write_to_json(data, filename):
+    """Writes the scraped data to a JSON file."""
+    try:
+        with open(filename, "w", encoding="utf-8") as f:  # Specify encoding
+            json.dump(data, f, indent=4, ensure_ascii=False
+                      )  # Pretty print and handle non-ASCII characters
+        logger.info(f"Data written to {filename}")
+    except Exception as e:
+        logger.error(f"Error writing to JSON file: {e}")
+
+
+def scrape_google_maps_urls(driver):
     # Google maps and results are successfully loaded
     # Initialize the output list
     urls = []
@@ -113,8 +109,10 @@ def scrape_google_maps_urls(search_query, driver):
             # Find all the businesses in the search results
             businesses = WebDriverWait(driver, 10).until(
                 EC.presence_of_all_elements_located((By.CLASS_NAME, 'hfpxzc')))
-        except:
+        except Exception as e:
             # If no businesses are found, break the loop
+            logger.error(f"An error occurred: {e}")
+            logger.error(f"An error occurred: {e.__traceback__.tb_lineno}")
             break
 
         time.sleep(5)
@@ -141,15 +139,19 @@ def scrape_google_maps_urls(search_query, driver):
             if len(new_businesses) == len(businesses):
                 # If no new businesses are loaded, break the loop
                 break
-        except:
+        except Exception as e:
             # If an exception occurs, break the loop
+            logger.error(f"An error occurred: {e}")
+            logger.error(f"An error occurred: {e.__traceback__.tb_lineno}")
             break
 
+    logger.info(f"Final scrolled URL number: {str(len(urls))}")
     return urls
 
 
 def scrape_url_data(google_url, chrome_options):
     """Scrapes data from a single business URL."""
+
     try:
         driver = webdriver.Chrome(
             options=chrome_options)  #Pass the chrome_options
@@ -171,6 +173,7 @@ def scrape_url_data(google_url, chrome_options):
         except Exception as e:
             name = "N/A"
             logger.error(f"name: {e}")
+            logger.error(f"name: {e.__traceback__.tb_lineno}")
 
         # link to the hotels website
         try:
@@ -185,6 +188,7 @@ def scrape_url_data(google_url, chrome_options):
         except Exception as e:
             url = "N/A"
             logger.error(f"url: {e}")
+            logger.error(f"url: {e.__traceback__.tb_lineno}")
 
         # address
         try:
@@ -198,6 +202,7 @@ def scrape_url_data(google_url, chrome_options):
         except Exception as e:
             address = "N/A"
             logger.error(f"address: {e}")
+            logger.error(f"address: {e.__traceback__.tb_lineno}")
 
         # phone number
         try:
@@ -211,6 +216,7 @@ def scrape_url_data(google_url, chrome_options):
         except Exception as e:
             phone = "N/A"
             logger.error(f"phone: {e}")
+            logger.error(f"phone: {e.__traceback__.tb_lineno}")
 
         # working hours
         try:
@@ -237,6 +243,7 @@ def scrape_url_data(google_url, chrome_options):
         except Exception as e:
             workingHours = "N/A"
             logger.error(f"workingHours: {e}")
+            logger.error(f"workingHours: {e.__traceback__.tb_lineno}")
 
         # Number of reviews
         try:
@@ -248,20 +255,21 @@ def scrape_url_data(google_url, chrome_options):
                 'outerHTML')
             soup = BeautifulSoup(numberOfReviewsHtml, 'html.parser')
 
-            # Find all span elements
+            # Find all span elements with both 'fontBodySmall' and 'gSamH' classes
             spans = soup.find_all('span')
 
             # Extract the text content from each span and create a comma-separated string
             numberOfReviews = [span.text for span in spans]
-            numberOfReviews = ", ".join(numberOfReviews)
-            numberOfReviews = str(extract_number(numberOfReviews)).replace(
-                ".", "")
-
-            if not numberOfReviews:
+            if len(numberOfReviews) > 0:
+                numberOfReviews = ", ".join(numberOfReviews)
+                numberOfReviews = extract_number(numberOfReviews)
+            else:
                 numberOfReviews = "N/A"
+
         except Exception as e:
             numberOfReviews = "N/A"
             logger.error(f"numberOfReviews: {e}")
+            logger.error(f"numberOfReviews: {e.__traceback__.tb_lineno}")
 
         # average review score
         try:
@@ -277,6 +285,8 @@ def scrape_url_data(google_url, chrome_options):
         except Exception as e:
             averageReviewScore = "N/A"
             logger.error(f"averageReviewScoreHtml: {e}")
+            logger.error(
+                f"averageReviewScoreHtml: {e.__traceback__.tb_lineno}")
 
         # checkInOutTimes
         try:
@@ -285,45 +295,45 @@ def scrape_url_data(google_url, chrome_options):
                     (By.CSS_SELECTOR, "[data-item-id*='place-info-links:']")))
             checkInOutTimesHtml = checkInOutTimesElement.get_attribute(
                 'outerHTML')
-
             soup = BeautifulSoup(checkInOutTimesHtml, 'html.parser')
 
-            # Extract the text content from each span and create a comma-separated string
             spans = soup.find_all('span')
             checkInOutTimes = [span.text for span in spans]
-            checkInOutTimes = [
-                clean_text(string) for string in checkInOutTimes
-            ]
-            checkInOutTimes = [s for s in checkInOutTimes if s.strip()]
-            checkInOutTimes = " - ".join(checkInOutTimes)
-
-            if not checkInOutTimes:
+            if checkInOutTimes:
+                if (len(checkInOutTimes) > 1):
+                    checkInOutTimes = checkInOutTimes[
+                        0] + " - " + checkInOutTimes[1]
+                else:
+                    checkInOutTimes = checkInOutTimes[0]
+            else:
                 checkInOutTimes = "N/A"
+
         except Exception as e:
             checkInOutTimes = "N/A"
             logger.error(f"checkInOutTimes: {e}")
+            logger.error(f"checkInOutTimes: {e.__traceback__.tb_lineno}")
 
         # amenities
         try:
             amenities_element = WebDriverWait(driver, 2).until(
                 EC.presence_of_element_located((By.CLASS_NAME, 'WKLD0c')))
-
             # Using Selenium's get_attribute('outerHTML')
             amenities_html = amenities_element.get_attribute('outerHTML')
 
             soup = BeautifulSoup(amenities_html, 'html.parser')
             spans = soup.find_all('span')
-
             # Extract the text content from each span and create a comma-separated string
             amenities = [clean_text(span.text) for span in spans]
-            amenities = [s for s in amenities if s.strip()]
-            amenities = ", ".join(amenities)
-
-            if not amenities:
+            if amenities and len(amenities) > 0:
+                amenities = ", ".join(amenities)
+                amenities = amenities.replace(", , ", ", ")
+            else:
                 amenities = "N/A"
+
         except Exception as e:
             amenities = "N/A"
             logger.error(f"amenities: {e}")
+            logger.error(f"amenities: {e.__traceback__.tb_lineno}")
 
         # Number of OTAs
         try:
@@ -338,7 +348,7 @@ def scrape_url_data(google_url, chrome_options):
             numberOfOTAsHtml = driver.page_source
             soup = BeautifulSoup(numberOfOTAsHtml, 'html.parser')
 
-            # Find all span elements
+            # Find all span elements with both 'fontBodySmall' and 'gSamH' classes
             spans = soup.find_all('span', class_='QVR4f fontTitleSmall')
 
             # Extract the text content from each span and create a comma-separated string
@@ -350,30 +360,41 @@ def scrape_url_data(google_url, chrome_options):
         except Exception as e:
             numberOfOTAs = "N/A"
             logger.error(f"numberOfOTAs: {e}")
+            logger.error(f"numberOfOTAs: {e.__traceback__.tb_lineno}")
 
         # OTA links
         try:
+            # Wait for the "Prices" tab and click it
+            #price_tab = WebDriverWait(driver, 10).until(
+            #    EC.element_to_be_clickable((By.XPATH, "//button[@class='hh2c6 ']"))
+            #)
+            #price_tab.click()
+            # Allow time for prices to load
+            #time.sleep(3)
+
             numberOfOTAsLinksHtml = driver.page_source
             soup = BeautifulSoup(numberOfOTAsLinksHtml, 'html.parser')
 
-            # Find all a elements
+            # Find all span elements with both 'fontBodySmall' and 'gSamH' classes
             atags = soup.find_all('a', class_='SlvSdc co54Ed')
             hrefs = [a['href'] for a in atags if 'href' in a.attrs]
 
             # Extract the text content from each span and create a comma-separated string
-            otaLinks = ", ".join(hrefs)
-
-            if not otaLinks:
+            if len(hrefs) > 0:
+                otaLinks = ", ".join(hrefs)
+            else:
                 otaLinks = "N/A"
+
         except Exception as e:
             otaLinks = "N/A"
             logger.error(f"otaLinks: {e}")
+            logger.error(f"otaLinks: {e.__traceback__.tb_lineno}")
 
         # Calculate average OTA price
         try:
             soup = BeautifulSoup(driver.page_source, 'html.parser')
 
-            # Find all div elements
+            # Find all span elements with both 'fontBodySmall' and 'gSamH' classes
             divs = soup.find_all('div', class_='fontLabelMedium pUBf3e oiQUX')
 
             # Extract the text content from each span and create a comma-separated string
@@ -407,7 +428,7 @@ def scrape_url_data(google_url, chrome_options):
                 # Find all <a> tags with social media links
                 links = soup.find_all("a", href=social_media_pattern)
 
-                # Extracted links
+                # Print the extracted links
                 socialMediaLinks = [link["href"] for link in links]
                 socialMediaLinks = ", ".join(socialMediaLinks)
 
@@ -416,7 +437,6 @@ def scrape_url_data(google_url, chrome_options):
             except Exception as e:
                 socialMediaLinks = "N/A"
                 logger.error(f"socialMediaLinks: {e}")
-                logger.error(f"socialMediaLinks: {__file__}")
                 logger.error(f"socialMediaLinks: {e.__traceback__.tb_lineno}")
         else:
             socialMediaLinks = "N/A"
@@ -458,7 +478,6 @@ def scrape_url_data(google_url, chrome_options):
             "name": name,
             "phone": phone,
             "url": url,
-            "googleMapsUrl": google_url,
             "address": address,
             "numberOfReviews": numberOfReviews,
             "averageReviewScore": averageReviewScore,
@@ -474,35 +493,14 @@ def scrape_url_data(google_url, chrome_options):
 
     except Exception as e:
         logger.error(f"Error scraping : {e}")
-        logger.error(f"Error scraping : {__file__}")
         logger.error(f"Error scraping : {e.__traceback__.tb_lineno}")
         return None
 
 
-def write_to_csv():
-    # Load JSON file
-    json_file = "google_maps_results.json"  # Change to your JSON file path
-    df = pd.read_json(json_file)
-
-    # Convert to CSV
-    csv_file = "google_maps_results.csv"
-    df.to_csv(csv_file, index=False)
-
-    logger.info(f"CSV file saved as {csv_file}")
-
-
-def write_to_json(data, filename):
-    """Writes the scraped data to a JSON file."""
-    try:
-        with open(filename, "w", encoding="utf-8") as f:  # Specify encoding
-            json.dump(data, f, indent=4, ensure_ascii=False
-                      )  # Pretty print and handle non-ASCII characters
-        logger.info(f"Data written to {filename}")
-    except Exception as e:
-        logger.error(f"Error writing to JSON file: {e}")
-
-
-def perform_scraping():
+def perform_scraping(search_query="Hotels",
+                     location=None,
+                     radius=5000,
+                     max_results=20):
     """Main scraping function."""
     global progress, scraped_data
     progress = 0  # Reset progress
@@ -527,26 +525,33 @@ def perform_scraping():
         logger.error(f"Error setting chrome: {e}")
         exit()
 
-    # It is much easier to use Google maps API, parameterized search like lat, lng, radius of search etc.
-    # Also JSON is much easier to handle in app instead of plain scraping with Selenium and ChromeDriver :)
-    # Also, this was intended to use search_query, but for ease of use, url that is used is url for nearby hotels provided by your url.
-    # Could have used Google Places API, but that does not come for free. Check pricing here: https://developers.google.com/maps/documentation/places/web-service/usage-and-billing
-    # Probably with this small amount of API calls it is free, but from 10K calls/maps and above, it becomes costly.
-    # So I did not opted for Google Maps API solution, and I have moved with plain scraping using Selenium and ChromeDriver.
-    # It is harder to scrape data, then to fetch through API, but this depends on company policies, budget, requirements etc.
-    # Most of scraping I have done this way, just like most of AI companies did :)
-    driver.get(
-        "https://www.google.com/maps/search/Hotels/@30.3736662,-86.5128752,12z/data=!4m5!2m4!5m3!5m2!1s2025-03-01!2i3?authuser=0&entry=ttu&g_ep=EgoyMDI1MDIyNi4xIKXMDSoASAFQAw%3D%3D"
-    )
+    # Build the Google Maps URL
+    if location:
+        # If location coordinates are provided, use them in the URL
+        lat, lng = location
+        maps_url = f"https://www.google.com/maps/search/{search_query}/@{lat},{lng},14z"
+    else:
+        # Otherwise just use the search query
+        maps_url = f"https://www.google.com/maps/search/{search_query}"
+
+    logger.info(f"Opening Google Maps with URL: {maps_url}")
+    driver.get(maps_url)
 
     try:
-        search_query = None
-        urls = scrape_google_maps_urls(search_query, driver)
-        num_processes = multiprocessing.cpu_count(
-        )  # Use all available cores or adjust as needed
+        urls = scrape_google_maps_urls(driver)
 
-        logger.info(f"Final scrolled URL number: {str(len(urls))}")
+        # Limit the number of URLs to process
+        if max_results and max_results < len(urls):
+            urls = urls[:max_results]
+
+        num_processes = multiprocessing.cpu_count()
+        # Use fewer processes if we have fewer URLs
+        if len(urls) < num_processes:
+            num_processes = len(urls)
+
         write_to_json(urls, "google_maps_results_urls.json")
+        logger.info(
+            f"Processing {len(urls)} URLs with {num_processes} processes")
 
         with multiprocessing.Pool(processes=num_processes) as pool:
             # Map the scraping function to the URLs
@@ -563,10 +568,11 @@ def perform_scraping():
 
         # Write the data to the CSV file
         write_to_csv()
+        return True
     except Exception as e:
         logger.error(f"An error occurred: {e}")
-        logger.error(f"An error occurred: {__file__}")
         logger.error(f"An error occurred: {e.__traceback__.tb_lineno}")
+        return False
     finally:
         try:
             driver.quit()
