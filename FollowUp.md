@@ -76,15 +76,15 @@ Feel free to include a written explanation of anything as well if you feel neces
 
 
 ## Google Maps API vs Selenium & ChromeDriver - mix of solutions
-    It is much easier to use Google maps API, parameterized search like lat, lng, radius of search etc.
+    It is much easier to use Google Places API, parameterized search like lat, lng, radius of search etc.
     Also JSON is much easier to handle in app instead of plain scraping with Selenium and ChromeDriver :)
     Also, this was intended to use search_query, but for ease of use, url that is used is url for nearby hotels provided by your url.
     Could have used Google Places API, but that does not come for free. Check pricing here: https://developers.google.com/maps/documentation/places/web-service/usage-and-billing
-    Probably with this small amount of API calls it is free, but from 100.000 calls/maps and above, it becomes costly.
-    So I did not choose Google Maps API solution, and I have moved with plain scraping using Selenium and ChromeDriver.
+    Probably with this small amount of API calls it is free, but from 10K calls/maps and above, it becomes costly for each 1K of requests.
+    So I did not choose Google Places API solution, and I have moved with plain scraping using Selenium and ChromeDriver.
     It is harder to scrape data, then to fetch through API, but this depends on company policies, budget, requirements etc.
     Most of scraping I have done this way, just like most of AI companies did :)
-    Also, there might be mix of those two approaches, for best results. Fetching data from Google Maps API and then fetching website data using Selenium and Webscraping for thata that is not
+    Also, there might be mix of those two approaches, for best results. Fetching data from Google Places API and then fetching website data using Selenium and Webscraping for thata that is not
     present in API.
 
 
@@ -162,3 +162,12 @@ Scraping all 120+ records for this example might take some time, especially if s
     Those are only hotels and differnt/missing/addidional data may appear/disappear on different types of scracping. 
     Also important note is that css selector changes according to language that is used for google maps.
     So, solution to this is to use mix of Google Maps API and Selenium & ChromeDriver for scraping and fetching data form API.
+
+## LAST: About the code
+    My steps of programming include:
+    1. Make it work
+    2. Optimize it
+    3. Make it beautiful
+
+    I have done only step 1 :)
+    
