@@ -180,10 +180,8 @@ def scrape_google_maps_urls(search_query, driver):
     logger.info(f"Final scrolled URL number: {str(len(urls))}")
     return urls
 
-
 def scrape_url_data(google_url, chrome_options):
     """Scrapes data from a single business URL."""
-
     try:
         driver = webdriver.Chrome(
             options=chrome_options)  #Pass the chrome_options
@@ -205,7 +203,6 @@ def scrape_url_data(google_url, chrome_options):
         except Exception as e:
             name = "N/A"
             logger.error(f"name: {e}")
-            logger.error(f"name: {e.__traceback__.tb_lineno}")
 
         # link to the hotels website
         try:
@@ -220,7 +217,6 @@ def scrape_url_data(google_url, chrome_options):
         except Exception as e:
             url = "N/A"
             logger.error(f"url: {e}")
-            logger.error(f"url: {e.__traceback__.tb_lineno}")
 
         # address
         try:
@@ -234,7 +230,6 @@ def scrape_url_data(google_url, chrome_options):
         except Exception as e:
             address = "N/A"
             logger.error(f"address: {e}")
-            logger.error(f"address: {e.__traceback__.tb_lineno}")
 
         # phone number
         try:
@@ -248,7 +243,6 @@ def scrape_url_data(google_url, chrome_options):
         except Exception as e:
             phone = "N/A"
             logger.error(f"phone: {e}")
-            logger.error(f"phone: {e.__traceback__.tb_lineno}")
 
         # working hours
         try:
@@ -275,7 +269,6 @@ def scrape_url_data(google_url, chrome_options):
         except Exception as e:
             workingHours = "N/A"
             logger.error(f"workingHours: {e}")
-            logger.error(f"workingHours: {e.__traceback__.tb_lineno}")
 
         # Number of reviews
         try:
@@ -287,21 +280,20 @@ def scrape_url_data(google_url, chrome_options):
                 'outerHTML')
             soup = BeautifulSoup(numberOfReviewsHtml, 'html.parser')
 
-            # Find all span elements with both 'fontBodySmall' and 'gSamH' classes
+            # Find all span elements
             spans = soup.find_all('span')
 
             # Extract the text content from each span and create a comma-separated string
             numberOfReviews = [span.text for span in spans]
-            if len(numberOfReviews) > 0:
-                numberOfReviews = ", ".join(numberOfReviews)
-                numberOfReviews = extract_number(numberOfReviews)
-            else:
-                numberOfReviews = "N/A"
+            numberOfReviews = ", ".join(numberOfReviews)
+            numberOfReviews = str(extract_number(numberOfReviews)).replace(
+                ".", "")
 
+            if not numberOfReviews:
+                numberOfReviews = "N/A"
         except Exception as e:
             numberOfReviews = "N/A"
             logger.error(f"numberOfReviews: {e}")
-            logger.error(f"numberOfReviews: {e.__traceback__.tb_lineno}")
 
         # average review score
         try:
@@ -317,8 +309,6 @@ def scrape_url_data(google_url, chrome_options):
         except Exception as e:
             averageReviewScore = "N/A"
             logger.error(f"averageReviewScoreHtml: {e}")
-            logger.error(
-                f"averageReviewScoreHtml: {e.__traceback__.tb_lineno}")
 
         # checkInOutTimes
         try:
@@ -327,45 +317,45 @@ def scrape_url_data(google_url, chrome_options):
                     (By.CSS_SELECTOR, "[data-item-id*='place-info-links:']")))
             checkInOutTimesHtml = checkInOutTimesElement.get_attribute(
                 'outerHTML')
+
             soup = BeautifulSoup(checkInOutTimesHtml, 'html.parser')
 
+            # Extract the text content from each span and create a comma-separated string
             spans = soup.find_all('span')
             checkInOutTimes = [span.text for span in spans]
-            if checkInOutTimes:
-                if (len(checkInOutTimes) > 1):
-                    checkInOutTimes = checkInOutTimes[
-                        0] + " - " + checkInOutTimes[1]
-                else:
-                    checkInOutTimes = checkInOutTimes[0]
-            else:
-                checkInOutTimes = "N/A"
+            checkInOutTimes = [
+                clean_text(string) for string in checkInOutTimes
+            ]
+            checkInOutTimes = [s for s in checkInOutTimes if s.strip()]
+            checkInOutTimes = " - ".join(checkInOutTimes)
 
+            if not checkInOutTimes:
+                checkInOutTimes = "N/A"
         except Exception as e:
             checkInOutTimes = "N/A"
             logger.error(f"checkInOutTimes: {e}")
-            logger.error(f"checkInOutTimes: {e.__traceback__.tb_lineno}")
 
         # amenities
         try:
             amenities_element = WebDriverWait(driver, 2).until(
                 EC.presence_of_element_located((By.CLASS_NAME, 'WKLD0c')))
+
             # Using Selenium's get_attribute('outerHTML')
             amenities_html = amenities_element.get_attribute('outerHTML')
 
             soup = BeautifulSoup(amenities_html, 'html.parser')
             spans = soup.find_all('span')
+
             # Extract the text content from each span and create a comma-separated string
             amenities = [clean_text(span.text) for span in spans]
-            if amenities and len(amenities) > 0:
-                amenities = ", ".join(amenities)
-                amenities = amenities.replace(", , ", ", ")
-            else:
-                amenities = "N/A"
+            amenities = [s for s in amenities if s.strip()]
+            amenities = ", ".join(amenities)
 
+            if not amenities:
+                amenities = "N/A"
         except Exception as e:
             amenities = "N/A"
             logger.error(f"amenities: {e}")
-            logger.error(f"amenities: {e.__traceback__.tb_lineno}")
 
         # Number of OTAs
         try:
@@ -380,7 +370,7 @@ def scrape_url_data(google_url, chrome_options):
             numberOfOTAsHtml = driver.page_source
             soup = BeautifulSoup(numberOfOTAsHtml, 'html.parser')
 
-            # Find all span elements with both 'fontBodySmall' and 'gSamH' classes
+            # Find all span elements
             spans = soup.find_all('span', class_='QVR4f fontTitleSmall')
 
             # Extract the text content from each span and create a comma-separated string
@@ -392,41 +382,30 @@ def scrape_url_data(google_url, chrome_options):
         except Exception as e:
             numberOfOTAs = "N/A"
             logger.error(f"numberOfOTAs: {e}")
-            logger.error(f"numberOfOTAs: {e.__traceback__.tb_lineno}")
 
         # OTA links
         try:
-            # Wait for the "Prices" tab and click it
-            #price_tab = WebDriverWait(driver, 10).until(
-            #    EC.element_to_be_clickable((By.XPATH, "//button[@class='hh2c6 ']"))
-            #)
-            #price_tab.click()
-            # Allow time for prices to load
-            #time.sleep(3)
-
             numberOfOTAsLinksHtml = driver.page_source
             soup = BeautifulSoup(numberOfOTAsLinksHtml, 'html.parser')
 
-            # Find all span elements with both 'fontBodySmall' and 'gSamH' classes
+            # Find all a elements
             atags = soup.find_all('a', class_='SlvSdc co54Ed')
             hrefs = [a['href'] for a in atags if 'href' in a.attrs]
 
             # Extract the text content from each span and create a comma-separated string
-            if len(hrefs) > 0:
-                otaLinks = ", ".join(hrefs)
-            else:
-                otaLinks = "N/A"
+            otaLinks = ", ".join(hrefs)
 
+            if not otaLinks:
+                otaLinks = "N/A"
         except Exception as e:
             otaLinks = "N/A"
             logger.error(f"otaLinks: {e}")
-            logger.error(f"otaLinks: {e.__traceback__.tb_lineno}")
 
         # Calculate average OTA price
         try:
             soup = BeautifulSoup(driver.page_source, 'html.parser')
 
-            # Find all span elements with both 'fontBodySmall' and 'gSamH' classes
+            # Find all div elements
             divs = soup.find_all('div', class_='fontLabelMedium pUBf3e oiQUX')
 
             # Extract the text content from each span and create a comma-separated string
@@ -460,7 +439,7 @@ def scrape_url_data(google_url, chrome_options):
                 # Find all <a> tags with social media links
                 links = soup.find_all("a", href=social_media_pattern)
 
-                # Print the extracted links
+                # Extracted links
                 socialMediaLinks = [link["href"] for link in links]
                 socialMediaLinks = ", ".join(socialMediaLinks)
 
@@ -469,6 +448,7 @@ def scrape_url_data(google_url, chrome_options):
             except Exception as e:
                 socialMediaLinks = "N/A"
                 logger.error(f"socialMediaLinks: {e}")
+                logger.error(f"socialMediaLinks: {__file__}")
                 logger.error(f"socialMediaLinks: {e.__traceback__.tb_lineno}")
         else:
             socialMediaLinks = "N/A"
@@ -510,6 +490,7 @@ def scrape_url_data(google_url, chrome_options):
             "name": name,
             "phone": phone,
             "url": url,
+            "googleMapsUrl": google_url,
             "address": address,
             "numberOfReviews": numberOfReviews,
             "averageReviewScore": averageReviewScore,
@@ -525,9 +506,9 @@ def scrape_url_data(google_url, chrome_options):
 
     except Exception as e:
         logger.error(f"Error scraping : {e}")
+        logger.error(f"Error scraping : {__file__}")
         logger.error(f"Error scraping : {e.__traceback__.tb_lineno}")
         return None
-
 
 def perform_scraping(search_query=None,
                      location=None,
