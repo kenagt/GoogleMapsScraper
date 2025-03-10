@@ -10,7 +10,6 @@
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/fixedheader/3.3.2/css/fixedHeader.dataTables.min.css">
     <link rel="stylesheet" type="text/css" href="/static/css/style.css">
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-
 </head>
 <body>
     <div class="container">
@@ -136,19 +135,31 @@
                     <!-- Ratings Tab -->
                     <div class="tab-pane fade" id="ratings-tab-pane" role="tabpanel" aria-labelledby="ratings-tab" tabindex="0">
                         <h5 class="card-title">Hotel Rating Distribution</h5>
-                        <div class="chart-container" id="ratingDistributionChart"></div>
+                        <div class="row" >
+                            <div class="container d-flex align-items-center justify-content-center" >
+                                <div id="ratingDistributionChart"></div>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Prices Tab -->
                     <div class="tab-pane fade" id="prices-tab-pane" role="tabpanel" aria-labelledby="prices-tab" tabindex="0">
                         <h5 class="card-title">Hotel Price Distribution</h5>
-                        <div class="chart-container" id="priceDistributionChart"></div>
+                        <div class="row" >
+                            <div class="container d-flex align-items-center justify-content-center" >
+                                <div id="priceDistributionChart"></div>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Market Positioning Tab -->
                     <div class="tab-pane fade" id="positioning-tab-pane" role="tabpanel" aria-labelledby="positioning-tab" tabindex="0">
-                        <h5 class="card-title">Market Positioning Map: Price vs. Quality</h5>
-                        <div class="chart-container" id="marketPositioningChart"></div>
+                        <h5 class="card-title">Market Positioning Map: Price vs. Quality</h5>                        
+                        <div class="row" >
+                            <div class="container d-flex align-items-center justify-content-center" >
+                                <div id="marketPositioningChart"></div>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Amenity Analysis Tab -->
@@ -166,7 +177,11 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="chart-container" id="amenityAnalysisChart"></div>
+                        <div class="row" >
+                            <div class="container d-flex align-items-center justify-content-center" >
+                                <div id="amenityAnalysisChart"></div>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="tab-pane fade" id="comparison-tab-pane" role="tabpanel" aria-labelledby="comparison-tab" tabindex="0">
@@ -203,11 +218,15 @@
                         </div>
                         
                         <div id="comparisonAlert"></div>
-                        
-                        <div class="chart-container" id="hotelComparisonChart">
-                            <div class="text-center text-muted">
-                                <i class="fas fa-chart-bar fa-3x mb-3"></i>
-                                <p>Select hotels and comparison type above to generate a comparison chart</p>
+
+                        <div class="row" >
+                            <div class="container d-flex align-items-center justify-content-center" >
+                                <div id="hotelComparisonChart">                                    
+                                    <div class="text-center text-muted">
+                                        <i class="fas fa-chart-bar fa-3x mb-3"></i>
+                                        <p>Select hotels and comparison type above to generate a comparison chart</p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -243,24 +262,7 @@
     <script src="https://cdn.datatables.net/fixedheader/3.3.2/js/dataTables.fixedHeader.min.js"></script>
     <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>  <!-- Plotly.js -->
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script> <!-- Select2.js -->
-    <script>
-
-        // Function to convert the string to the desired format
-        function formatString(input) {
-            // Capitalize the first letter of the first word, and make the rest lowercase
-            let capitalized = input.charAt(0).toUpperCase() + input.slice(1);
-
-            // Split the string into words using a regular expression that finds capital letters
-            let words = capitalized.replace(/([A-Z])/g, ' $1').trim().split(' ');
-
-            // Convert the first word to uppercase and all other words to lowercase
-            for (let i = 1; i < words.length; i++) {
-                words[i] = words[i].toLowerCase();
-            }
-
-            // Join the words back into a string with spaces
-            return words.join(' ');
-        }
+    <script>        
         // JavaScript function to update table headers after the page loads
         window.onload = function() {
             // Get all the header cells (<th>) in the table
@@ -295,9 +297,9 @@
             // Handle click on view button
             $('#myTable tbody').on('click', '.view-button', function () {
                 var rowIndex = $(this).data('row-index');
+                
                  //Use this code to get all data
                 var allData = dataTable.rows().data().toArray();
-
                 var rowData = allData[rowIndex]; // Get row data
 
                 // Populate the modal body with the row data
@@ -309,7 +311,7 @@
 
                 for (var i = 0; i < keys.length; i++) {
                     var field_value = rowData[i+1]; // +1 to skip view button
-                    var parts = field_value.split(',');
+                    var parts = field_value.split(', ');
 
                     html += '<div class="mb-3 modal-data-container">';
                     html += '<label for="data-' + keys[i] + '" class="form-label">' + formatString(keys[i]) + ':</label>';
@@ -324,7 +326,7 @@
                             if (urlRegex.test(part) || urlRegex2.test(part)) {
                                 // Add protocol if missing
                                 var href = part.startsWith('http') ? part : 'https://' + part;
-                                html += '<div class="mb-1"><a href="' + href + '" target="_blank" rel="noopener noreferrer">' + part.substring(0, 50) + '</a></div>';
+                                html += '<div class="mb-1"><a href="' + href + '" target="_blank" rel="noopener noreferrer">' + part.substring(0, 50) + '...</a></div>';
                             } else {
                                 html += '<span class="badge bg-secondary me-1" style="padding:7px;">' + part + '</span>';
                             }
@@ -332,10 +334,12 @@
                     } else {
                         // Improved URL check using a regular expression (no numbers in TLD)
                         var urlRegex = /^(?:(?:https?|ftp):\/\/)?(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z]{2,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&//=]*)$/i;
-                        if (urlRegex.test(field_value)) {
+                        var urlRegex2 = /https?:\/\/[a-zA-Z0-9\-\.]+(?:\:[0-9]+)?(?:\/[\w\-\.]*)*(?:\?[\w\=\&\%]*)?(?:#[\w\-]*)?/;
+
+                        if (urlRegex.test(field_value) || urlRegex2.test(field_value)) {
                             // Add protocol if missing
                             var href = field_value.startsWith('http') ? field_value : 'https://' + field_value;
-                            html += '<div class="mb-1"><a href="' + href + '" target="_blank" rel="noopener noreferrer">' + field_value + '</a></div>';
+                            html += '<div class="mb-1"><a href="' + href + '" target="_blank" rel="noopener noreferrer">' + field_value.substring(0, 50) + '</a></div>';
                         }
                         else
                         {
@@ -411,7 +415,7 @@
             // Function to update all charts with appropriate theme
             function updateChartsTheme(isDarkMode) {
                 const theme = isDarkMode ? 'plotly_dark' : 'plotly_white';
-                const chartDivs = ['ratingDistributionChart', 'priceDistributionChart', 'marketPositioningChart', 'amenityAnalysisChart'];
+                const chartDivs = ['ratingDistributionChart', 'priceDistributionChart', 'marketPositioningChart', 'amenityAnalysisChart', 'hotelComparisonChart'];
                 
                 chartDivs.forEach(chartDiv => {
                     const chartElement = document.getElementById(chartDiv);
@@ -501,84 +505,110 @@
 
         // Hotel comparison chart functionality
         function createComparisonChart(selectedHotels, comparisonType) {
-        const chartDiv = document.getElementById('hotelComparisonChart');
-        chartDiv.innerHTML = '<div class="text-center"><i class="fas fa-spinner fa-spin fa-3x"></i><p>Generating comparison...</p></div>';
-        
-        // Get the current theme
-        const isDarkMode = document.getElementById('darkModeSwitch').checked;
-        const theme = isDarkMode ? 'plotly_dark' : 'plotly_white';
-        
-        // Fetch the comparison data from the server
-        $.ajax({
-            url: '/hotel_comparison',
-            type: 'GET',
-            data: {
-                hotels: JSON.stringify(selectedHotels),
-                comparison_type: comparisonType
-            },
-            success: function(response) {
-                try {
-                    // Remove loading indicator before plotting
-                    chartDiv.innerHTML = '';
-                    const chartData = JSON.parse(response);
-                    chartData.layout.template = theme;
-                    Plotly.newPlot('hotelComparisonChart', chartData.data, chartData.layout);
-                } catch (e) {
-                    console.error("Error rendering comparison chart:", e);
-                    chartDiv.innerHTML = '<div class="alert alert-danger">Error generating comparison chart</div>';
+            const chartDiv = document.getElementById('hotelComparisonChart');
+            chartDiv.innerHTML = '<div class="text-center"><i class="fas fa-spinner fa-spin fa-3x"></i><p>Generating comparison...</p></div>';
+            
+            // Get the current theme
+            const isDarkMode = document.getElementById('darkModeSwitch').checked;
+            const theme = isDarkMode ? 'plotly_dark' : 'plotly_white';
+            
+            // Fetch the comparison data from the server
+            $.ajax({
+                url: '/hotel_comparison',
+                type: 'GET',
+                data: {
+                    hotels: JSON.stringify(selectedHotels),
+                    comparison_type: comparisonType
+                },
+                success: function(response) {
+                    try {
+                        // Remove loading indicator before plotting
+                        chartDiv.innerHTML = '';
+                        const chartData = JSON.parse(response);
+                        chartData.layout.template = theme;
+                        Plotly.newPlot('hotelComparisonChart', chartData.data, chartData.layout);
+                    } catch (e) {
+                        console.error("Error rendering comparison chart:", e);
+                        chartDiv.innerHTML = '<div class="alert alert-danger">Error generating comparison chart</div>';
+                    }
+                },
+                error: function() {
+                    chartDiv.innerHTML = '<div class="alert alert-danger">Failed to load comparison data</div>';
                 }
-            },
-            error: function() {
-                chartDiv.innerHTML = '<div class="alert alert-danger">Failed to load comparison data</div>';
-            }
-        });
+            });
         }
 
         // Initialize comparison selection functionality
         function initComparisonTools() {
-        const hotelData = [];
+            const hotelData = [];
+            
+            // Extract hotel data from the table
+            $('#myTable').DataTable().rows().data().each(function(row) {
+                // Skip the first column which is the View button
+                const name = row[1];
+                hotelData.push(name);
+            });
+            
+            // Populate the hotel selection dropdown
+            const comparisonSelect = $('#hotelComparisonSelect');
+            hotelData.forEach(hotel => {
+                comparisonSelect.append($('<option></option>').val(hotel).text(hotel));
+            });
+    
+            // Initialize the multiselect functionality
+            $('#hotelComparisonSelect').select2({
+                placeholder: 'Select hotels to compare',
+                maximumSelectionLength: 5,
+                width: '100%'
+            });
+            
+            // Handle comparison button click
+            $('#generateComparisonBtn').click(function() {
+                const selectedHotels = $('#hotelComparisonSelect').val();
+                const comparisonType = $('#comparisonTypeSelect').val();
+                
+                if (selectedHotels.length < 2) {
+                $('#comparisonAlert').html('<div class="alert alert-warning">Please select at least 2 hotels to compare</div>');
+                return;
+                }
+                
+                $('#comparisonAlert').html('');
+                createComparisonChart(selectedHotels, comparisonType);
+            });
+            
+            // Update chart when comparison type changes (if hotels are already selected)
+            $('#comparisonTypeSelect').change(function() {
+                const selectedHotels = $('#hotelComparisonSelect').val();
+                if (selectedHotels.length >= 2) {
+                createComparisonChart(selectedHotels, $(this).val());
+                }
+            });
+        }
         
-        // Extract hotel data from the table
-        $('#myTable').DataTable().rows().data().each(function(row) {
-            // Skip the first column which is the View button
-            const name = row[1];
-            hotelData.push(name);
-        });
-        
-        // Populate the hotel selection dropdown
-        const comparisonSelect = $('#hotelComparisonSelect');
-        hotelData.forEach(hotel => {
-            comparisonSelect.append($('<option></option>').val(hotel).text(hotel));
-        });
+        function escapeQuotes(inputString) {
+          // Use a regular expression to match single and double quotes and escape them
+          return inputString.replace(/['"]/g, '\\$&');
+        }
 
-        // Initialize the multiselect functionality
-        $('#hotelComparisonSelect').select2({
-            placeholder: 'Select hotels to compare',
-            maximumSelectionLength: 5,
-            width: '100%'
-        });
-        
-        // Handle comparison button click
-        $('#generateComparisonBtn').click(function() {
-            const selectedHotels = $('#hotelComparisonSelect').val();
-            const comparisonType = $('#comparisonTypeSelect').val();
-            
-            if (selectedHotels.length < 2) {
-            $('#comparisonAlert').html('<div class="alert alert-warning">Please select at least 2 hotels to compare</div>');
-            return;
+        // Function to convert the string to the desired format
+        function formatString(input) {
+            // Capitalize the first letter of the first word, and make the rest lowercase
+            let capitalized = input.charAt(0).toUpperCase() + input.slice(1);
+
+            // Split the string into words using a regular expression that finds capital letters
+            let words = capitalized.replace(/([A-Z])/g, ' $1').trim().split(' ');
+
+            // Convert the first word to uppercase and all other words to lowercase
+            for (let i = 1; i < words.length; i++) {
+                words[i] = words[i].toLowerCase();
             }
-            
-            $('#comparisonAlert').html('');
-            createComparisonChart(selectedHotels, comparisonType);
-        });
-        
-        // Update chart when comparison type changes (if hotels are already selected)
-        $('#comparisonTypeSelect').change(function() {
-            const selectedHotels = $('#hotelComparisonSelect').val();
-            if (selectedHotels.length >= 2) {
-            createComparisonChart(selectedHotels, $(this).val());
-            }
-        });
+
+            // Join the words back into a string with spaces
+            return words.join(' ');
+        }
+
+        function isNumber(str) {
+          return !isNaN(str) && !isNaN(parseFloat(str));
         }
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
