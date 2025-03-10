@@ -38,7 +38,10 @@
 
         <div class="d-flex justify-content-start mb-3"> <!-- Changed to justify-content-start -->
             {% if scraping_in_progress %}
-                <div class="alert alert-info">Scraping in progress...</div>
+                <div class="alert alert-info">
+                    <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+                    <span role="status">&nbsp;&nbsp;Scraping in progress</span>
+                </div>
             {% else %}
                 <a href="{{ url_for('start_scraping') }}" class="btn btn-primary"><i class="fas fa-play me-2"></i> Start Scraping</a>
             {% endif %}

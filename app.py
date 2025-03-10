@@ -12,6 +12,7 @@ import plotly.io as pio
 pio.templates.default = "plotly_white"  # Or any other template you prefer
 
 app = Flask(__name__)
+app.config['SECRET_KEY'] = 'your_secret_key'  # Change this in production!
 
 CSV_FILE = "google_maps_results.csv"
 JSON_FILE = "google_maps_results.json"
