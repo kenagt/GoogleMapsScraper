@@ -251,8 +251,8 @@ footer {
     transition: background-color 0.3s ease; /*Added transition for smooth change*/
 }
 footer.dark-mode{
-    background-color: black;
-    color: white;
+    background-color: var(--bg-dark);
+    color: var(--bg-light);
 }        
 
 .chart-container {
