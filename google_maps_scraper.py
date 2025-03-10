@@ -99,7 +99,39 @@ def write_to_json(data, filename):
         logger.error(f"Error writing to JSON file: {e}")
 
 
-def scrape_google_maps_urls(driver):
+def scrape_google_maps_urls(search_query, driver):
+    if search_query is not None:
+        try:
+            search_box = WebDriverWait(driver, 10).until(
+                EC.presence_of_element_located((By.ID, 'searchboxinput')))
+
+            # Type the search query and press Enter
+            search_box.send_keys(search_query)
+            search_box.send_keys(Keys.RETURN)
+
+            # Wait for the search results to load
+            WebDriverWait(driver, 10).until(
+                EC.presence_of_element_located((By.CLASS_NAME, 'hfpxzc')))
+        except Exception as e:
+            logger.error(f"An error occurred: {e}")
+            logger.error(f"An error occurred: {e.__traceback__.tb_lineno}")
+            # If an exception occurs, retry the code block after a short delay
+            time.sleep(5)
+            try:
+                search_box = WebDriverWait(driver, 10).until(
+                    EC.presence_of_element_located((By.ID, 'searchboxinput')))
+                search_box.send_keys(search_query)
+                search_box.send_keys(Keys.RETURN)
+
+                WebDriverWait(driver, 10).until(
+                    EC.presence_of_element_located((By.CLASS_NAME, 'hfpxzc')))
+            except Exception as e:
+                # If the problem persists, print an error message and exit the script
+                logger.error(f"An error occurred: {e}")
+                logger.error(f"An error occurred: {e.__traceback__.tb_lineno}")
+                driver.quit()
+                exit()
+
     # Google maps and results are successfully loaded
     # Initialize the output list
     urls = []
@@ -497,7 +529,7 @@ def scrape_url_data(google_url, chrome_options):
         return None
 
 
-def perform_scraping(search_query="Hotels",
+def perform_scraping(search_query=None,
                      location=None,
                      radius=5000,
                      max_results=20):
@@ -530,15 +562,17 @@ def perform_scraping(search_query="Hotels",
         # If location coordinates are provided, use them in the URL
         lat, lng = location
         maps_url = f"https://www.google.com/maps/search/{search_query}/@{lat},{lng},14z"
-    else:
+    elif search_query:
         # Otherwise just use the search query
         maps_url = f"https://www.google.com/maps/search/{search_query}"
-
+    else:
+        maps_url = "https://www.google.com/maps/search/Hotels/@30.3736662,-86.5128752,12z/data=!4m5!2m4!5m3!5m2!1s2025-03-01!2i3?authuser=0&entry=ttu&g_ep=EgoyMDI1MDIyNi4xIKXMDSoASAFQAw%3D%3D"
+    
     logger.info(f"Opening Google Maps with URL: {maps_url}")
     driver.get(maps_url)
 
     try:
-        urls = scrape_google_maps_urls(driver)
+        urls = scrape_google_maps_urls(search_query, driver)
 
         # Limit the number of URLs to process
         if max_results and max_results < len(urls):
