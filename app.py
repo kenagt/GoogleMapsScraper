@@ -8,12 +8,10 @@ import json
 # Charting imports
 import plotly.graph_objects as go
 import plotly.io as pio
-import numpy as np
 
 pio.templates.default = "plotly_white"  # Or any other template you prefer
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'your_secret_key'  # Change this in production!
 
 CSV_FILE = "google_maps_results.csv"
 JSON_FILE = "google_maps_results.json"
@@ -82,13 +80,6 @@ def start_scraping():
     else:
         flash("Scraping is already in progress.", 'warning')
     return redirect(url_for('index'))
-
-
-@app.route('/amenity_analysis')
-def amenity_analysis():
-    hotel_name = request.args.get('hotel_name', None)
-    analysis_json, _ = create_amenity_gap_analysis(hotel_name)
-    return analysis_json
 
 
 def run_scraping():
@@ -527,47 +518,6 @@ def create_amenity_gap_analysis(hotel_name=None):
     return pio.to_json(fig), hotel_names
 
 
-@app.route('/hotel_comparison')
-def hotel_comparison():
-    """
-    Generate comparison data for selected hotels based on the comparison type.
-    """
-    global scraped_data
-
-    # Get request parameters
-    hotels_json = request.args.get('hotels', '[]')
-    comparison_type = request.args.get('comparison_type', 'bar')
-
-    try:
-        selected_hotels = json.loads(hotels_json)
-
-        # Validate input
-        if not selected_hotels or len(selected_hotels) < 2:
-            return json.dumps({"error": "Please select at least 2 hotels"})
-
-        # Get data for selected hotels
-        hotel_data = []
-        for hotel in scraped_data:
-            if hotel['name'] in selected_hotels:
-                hotel_data.append(hotel)
-
-        # Generate the appropriate chart based on comparison type
-        if comparison_type == 'bar':
-            return create_bar_comparison(hotel_data)
-        elif comparison_type == 'radar':
-            return create_radar_comparison(hotel_data)
-        elif comparison_type == 'amenities':
-            return create_amenities_comparison(hotel_data)
-        elif comparison_type == 'value':
-            return create_value_comparison(hotel_data)
-        else:
-            return json.dumps({"error": "Invalid comparison type"})
-
-    except Exception as e:
-        app.logger.error(f"Comparison error: {str(e)}", exc_info=True)
-        return json.dumps({"error": str(e)})
-
-
 def create_bar_comparison(hotel_data):
     """
     Create a bar chart comparing key metrics across selected hotels.
@@ -901,6 +851,54 @@ def create_value_comparison(hotel_data):
                                   x=1))
 
     return pio.to_json(fig)
+
+
+@app.route('/amenity_analysis')
+def amenity_analysis():
+    hotel_name = request.args.get('hotel_name', None)
+    analysis_json, _ = create_amenity_gap_analysis(hotel_name)
+    return analysis_json
+
+
+@app.route('/hotel_comparison')
+def hotel_comparison():
+    """
+    Generate comparison data for selected hotels based on the comparison type.
+    """
+    global scraped_data
+
+    # Get request parameters
+    hotels_json = request.args.get('hotels', '[]')
+    comparison_type = request.args.get('comparison_type', 'bar')
+
+    try:
+        selected_hotels = json.loads(hotels_json)
+
+        # Validate input
+        if not selected_hotels or len(selected_hotels) < 2:
+            return json.dumps({"error": "Please select at least 2 hotels"})
+
+        # Get data for selected hotels
+        hotel_data = []
+        for hotel in scraped_data:
+            if hotel['name'] in selected_hotels:
+                hotel_data.append(hotel)
+
+        # Generate the appropriate chart based on comparison type
+        if comparison_type == 'bar':
+            return create_bar_comparison(hotel_data)
+        elif comparison_type == 'radar':
+            return create_radar_comparison(hotel_data)
+        elif comparison_type == 'amenities':
+            return create_amenities_comparison(hotel_data)
+        elif comparison_type == 'value':
+            return create_value_comparison(hotel_data)
+        else:
+            return json.dumps({"error": "Invalid comparison type"})
+
+    except Exception as e:
+        app.logger.error(f"Comparison error: {str(e)}", exc_info=True)
+        return json.dumps({"error": str(e)})
 
 
 if __name__ == '__main__':
