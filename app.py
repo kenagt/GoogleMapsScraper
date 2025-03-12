@@ -3,7 +3,7 @@ import threading
 import pandas as pd
 from flask import Flask, render_template, redirect, url_for, flash, request, send_file, session, jsonify
 # Import your scraper functions (perform_scraping, etc.)
-from google_maps_scraper import perform_scraping  # Replace with your actual file
+from scraper.google_maps_scraper import perform_scraping  # Replace with your actual file
 import json
 # Charting imports
 import plotly.graph_objects as go
@@ -14,8 +14,8 @@ pio.templates.default = "plotly_white"  # Or any other template you prefer
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your_secret_key'  # Change this in production!
 
-CSV_FILE = "google_maps_results.csv"
-JSON_FILE = "google_maps_results.json"
+CSV_FILE = "results/google_maps_results.csv"
+JSON_FILE = "results/google_maps_results.json"
 
 # Global variables for data and progress
 scraping_in_progress = False  # Global flag

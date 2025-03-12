@@ -78,11 +78,11 @@ def is_open_24_hours(hours_text):
 
 def write_to_csv():
     # Load JSON file
-    json_file = "google_maps_results.json"  # Change to your JSON file path
+    json_file = "results/google_maps_results.json"  # Change to your JSON file path
     df = pd.read_json(json_file)
 
     # Convert to CSV
-    csv_file = "google_maps_results.csv"
+    csv_file = "results/google_maps_results.csv"
     df.to_csv(csv_file, index=False)
 
     logger.info(f"CSV file saved as {csv_file}")
@@ -421,34 +421,9 @@ def scrape_url_data(google_url, chrome_options):
         else:
             socialMediaLinks = "N/A"
 
-        # emails - It is connected to email and Google Places API.
-        # I have included into scraping now, but it is not used (commented out).
-        # Scraping emails is not an issue, but guessing contact page is, so results may vary.
-        #if url != "N/A":
-        #    possible_contact_page_urls = ["/about", "/contact", "/contact-us"]
-        #    for possible_path in possible_contact_page_urls:
-        #        contact_page_url = url.rstrip("/") + possible_path
-
-        #        try:
-        #            driver.get("https://" + contact_page_url)
-        #            WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
-
-        #            html = driver.page_source
-        #            soup = BeautifulSoup(html, 'html.parser')
-        #            text = soup.get_text()
-        #            emails = re.findall(r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(?:\.[a-zA-Z]{2,})?", text)
-
-        #            if emails:
-        #                email = emails[0]
-        #            else:
-        #                email = "N/A"
-
-        #        except Exception as e:
-        #            emails = "N/A"
-        #            logger.error(f"emails: {e}")
-        #            logger.error(f"emails: {e.__traceback__.tb_lineno}")
-        #else:
-        #    email = "N/A"
+        # emails - scrape from webpages with crawler
+        
+        
 
         driver.quit()  #Quit driver after usage
 
@@ -532,7 +507,7 @@ def perform_scraping(search_query=None,
         if len(urls) < num_processes:
             num_processes = len(urls)
 
-        write_to_json(urls, "google_maps_results_urls.json")
+        write_to_json(urls, "results/google_maps_results_urls.json")
         logger.info(
             f"Processing {len(urls)} URLs with {num_processes} processes")
 
@@ -547,7 +522,7 @@ def perform_scraping(search_query=None,
         scraped_data = [result for result in results if result is not None]
 
         # Write the data to the JSON file
-        write_to_json(scraped_data, "google_maps_results.json")
+        write_to_json(scraped_data, "results/google_maps_results.json")
 
         # Write the data to the CSV file
         write_to_csv()
