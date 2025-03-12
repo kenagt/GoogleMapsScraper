@@ -442,17 +442,55 @@ footer.dark-mode {
     #map {
         height: 300px;
     }
-    
+
     .btn-group {
         flex-direction: column;
         width: 100%;
     }
-    
+
     .btn-group .btn {
         margin-bottom: 5px;
         border-radius: 4px !important;
     }
 }
+/* Loading Indicator Styling */
+#tableLoadingIndicator {
+    position: relative;
+    padding: 30px;
+    border-radius: 8px;
+    background-color: rgba(255, 255, 255, 0.8);
+    z-index: 1000;
+    transition: all 0.3s ease;
+}
+
+/* DataTable Export Button Styling */
+.dt-export-btn {
+    display: inline-block;
+}
+
+/* Align export button with search field */
+.dataTables_filter {
+    display: flex;
+    align-items: center;
+}
+
+@media (max-width: 767px) {
+    .export-container {
+        margin-top: 10px;
+        margin-bottom: 10px;
+    }
+}
+
+html[data-bs-theme="dark"] #tableLoadingIndicator {
+    background-color: rgba(33, 37, 41, 0.8);
+    color: #f8f9fa;
+}
+
+#tableLoadingIndicator .spinner-border {
+    width: 3rem;
+    height: 3rem;
+}
+
 /* Quick Scrape Form Styling */
 .quick-scrape-card {
     border: none;
