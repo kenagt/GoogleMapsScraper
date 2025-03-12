@@ -14,6 +14,9 @@ from bs4 import BeautifulSoup
 import re
 import pandas as pd
 import logging
+import queue
+from domain_explorer import DomainExplorer
+from email_output import EmailOutput
 
 # Configure logging
 logging.basicConfig(level=logging.INFO,
@@ -453,11 +456,41 @@ def scrape_url_data(google_url, chrome_options):
         logger.error(f"Error scraping : {e.__traceback__.tb_lineno}")
         return None
 
+def perform_email_scraping(urls, json_data):
+    # Define two queues to work with. Set maxsize for the main queue
+    domainqueue = queue.Queue(maxsize=5000)
+    emailsqueue = queue.Queue()
+
+    # Start our threads
+    for _i in range(20):
+        t = DomainExplorer(domainqueue, emailsqueue)
+        t.daemon = True
+        t.start()
+
+    logger.info(f"Started {20} Threads")
+
+    # Start our collector thread
+    results_thread = EmailOutput(emailsqueue, json_data)
+    results_thread.daemon = True
+    results_thread.start()
+
+    # Add domains to the queue from a context manager to save memory
+    
+    for domain in urls:
+        domainqueue.put(domain)
+
+    # Gracefully join our queues so that our threads can exit
+    domainqueue.join()
+    logger.info("Domains finished processing")
+    emailsqueue.join()
+    logger.info("Collector finished processing")
+
 def perform_scraping(url=None,
                     search_query=None,
                      location=None,
                      radius=5000,
                      max_results=20):
+    
     """Main scraping function."""
     global progress, scraped_data
     progress = 0  # Reset progress
@@ -526,6 +559,20 @@ def perform_scraping(url=None,
         # Write the data to the JSON file
         write_to_json(scraped_data, "results/google_maps_results.json")
 
+        # Read the JSON file
+        with open("results/google_maps_results.json", 'r') as file:
+            json_data = json.load(file)
+
+        # Process each object in the array
+        for item in json_data:
+            # Extract all URL values from this item
+            urls = []
+            for key, value in item.items():
+                if "url" in key.lower() and isinstance(value, str) and value != "N/A":
+                    urls.append(value)
+
+        perform_email_scraping(urls, json_data)
+
         # Write the data to the CSV file
         write_to_csv()
         return True
@@ -541,4 +588,4 @@ def perform_scraping(url=None,
 
 
 if __name__ == "__main__":
-    perform_scraping()
+    perform_scraping("https://www.google.com/maps/search/Hotels/@30.3739107,-86.5128753,12z/data=!3m1!4b1!4m4!2m3!5m2!5m1!1s2025-05-17?authuser=0&entry=ttu&g_ep=EgoyMDI1MDMwOC4wIKXMDSoASAFQAw%3D%3D")
