@@ -249,9 +249,10 @@ footer {
     transition: background-color 0.3s ease; /*Added transition for smooth change*/
 }
 footer.dark-mode{
-    background-color: black;
-    color: white;
+    background-color: var(--bs-body-bg);
+    color: var(--bs-body-bg);
 }        
+
 
 .chart-container {
     margin-top: 20px;
@@ -319,16 +320,6 @@ footer {
 
 footer.dark-mode {
     color: #adb5bd;
-}
-
-/* Chart containers */
-#ratingDistributionChart, 
-#priceDistributionChart, 
-#marketPositioningChart, 
-#amenityAnalysisChart, 
-#hotelComparisonChart {
-    width: 100%;
-    margin: 0 auto;
 }
 
 /* Search form styling */

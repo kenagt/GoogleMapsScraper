@@ -3,7 +3,7 @@ import threading
 import pandas as pd
 from flask import Flask, render_template, redirect, url_for, flash, request, send_file, session, jsonify
 # Import your scraper functions (perform_scraping, etc.)
-from scraper.google_maps_scraper import perform_scraping  # Replace with your actual file
+from scraping.google_maps_scraper import perform_scraping  # Replace with your actual file
 import json
 # Charting imports
 import plotly.graph_objects as go
