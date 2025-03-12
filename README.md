@@ -1,12 +1,39 @@
-1. Install Visual Studio Code for your platform (Windows, Mac).
-2. Open Terminal and execute next commands.
-    # python -v
-    #### if python not installed install it
-    # pip install virtualenv
-    # cd to desired folder
-    # git clone https://github.com/kenagt/TestProjectCorzlyKenan
-    # python -m venv .venv
-    # .\.venv\Scripts\activate
-    # python -m pip install -r requirements.txt
-3. Run the app.
-    # python google_maps_scraper.py  
+# Setup Instructions for TestProjectCorzlyKenan
+
+Follow the steps below to set up the project on your system.
+
+## 1. Install Visual Studio Code
+Download and install [Visual Studio Code](https://code.visualstudio.com/) for your platform:
+- **Windows**: [Download for Windows](https://code.visualstudio.com/download)
+- **Mac**: [Download for Mac](https://code.visualstudio.com/download)
+
+## 2. Set Up the Environment
+
+Open the **Terminal** and execute the following commands:
+
+```bash
+# Check if Python is installed
+python -v
+
+# Install virtualenv
+pip install virtualenv
+
+# Change directory to the desired folder
+cd path/to/your/folder
+
+# Clone the repository
+git clone https://github.com/kenagt/TestProjectCorzlyKenan
+
+# Navigate into the project folder
+cd TestProjectCorzlyKenan
+
+# Create a virtual environment
+python -m venv .venv
+
+# Activate the virtual environment (Windows)
+.venv\Scripts\activate
+
+# Install required dependencies
+python -m pip install -r requirements.txt
+
+python google_maps_scraper.py
