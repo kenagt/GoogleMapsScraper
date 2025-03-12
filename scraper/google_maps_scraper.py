@@ -453,7 +453,8 @@ def scrape_url_data(google_url, chrome_options):
         logger.error(f"Error scraping : {e.__traceback__.tb_lineno}")
         return None
 
-def perform_scraping(search_query=None,
+def perform_scraping(url=None,
+                    search_query=None,
                      location=None,
                      radius=5000,
                      max_results=20):
@@ -489,9 +490,10 @@ def perform_scraping(search_query=None,
     elif search_query:
         # Otherwise just use the search query
         maps_url = f"https://www.google.com/maps/search/{search_query}"
-    else:
-        maps_url = "https://www.google.com/maps/search/Hotels/@30.3736662,-86.5128752,12z/data=!4m5!2m4!5m3!5m2!1s2025-03-01!2i3?authuser=0&entry=ttu&g_ep=EgoyMDI1MDIyNi4xIKXMDSoASAFQAw%3D%3D"
-    
+    elif url:
+        # Otherwise just use the search query
+        maps_url = url
+        
     logger.info(f"Opening Google Maps with URL: {maps_url}")
     driver.get(maps_url)
 

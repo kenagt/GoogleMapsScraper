@@ -37,17 +37,33 @@
         {% endwith %}
 
         <div class="d-flex justify-content-between mb-3">
-            <div>
+            <div class="row">
                 {% if scraping_in_progress %}
                     <div class="alert alert-info">
                         <span class="spinner-grow spinner-grow-sm" aria-hidden="true"></span>
                         <span role="status">&nbsp;&nbsp;Scraping in progress</span>
                     </div>
                 {% else %}
-                    <div class="btn-group" role="group">
-                        <a href="{{ url_for('start_scraping') }}" class="btn btn-primary">
-                            <i class="fas fa-play me-2"></i> Quick Scrape
-                        </a>
+                    <!-- Quick Scrape Form -->
+                    <div class="card mb-4 quick-scrape-card">
+                        <div class="card-header bg-gradient">
+                            <h5 class="mb-0"><i class="fas fa-bolt me-2"></i>Quick Scrape</h5>
+                        </div>
+                        <div class="card-body p-4">
+                            <form action="{{ url_for('quick_scrape') }}" method="post">
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light"><i class="fas fa-link"></i></span>
+                                    <input type="url" class="form-control" id="scrape_url" name="scrape_url" 
+                                           placeholder="Enter Google Maps URL to scrape" required>
+                                    <button type="submit" class="btn btn-warning px-4">
+                                        <i class="fas fa-bolt me-2"></i> Scrape
+                                    </button>
+                                </div>
+                                <small class="text-muted mt-2 d-block">Paste a Google Maps URL to quickly scrape a single location</small>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="btn-group mb-3" role="group">
                         <a href="{{ url_for('search') }}" class="btn btn-success">
                             <i class="fas fa-search me-2"></i> Custom Search
                         </a>
@@ -57,7 +73,7 @@
                     </div>
                 {% endif %}
             </div>
-            
+
             <!-- Export options -->
             <div class="dropdown">
                 <button class="btn btn-secondary dropdown-toggle" type="button" id="exportDropdown" data-bs-toggle="dropdown" aria-expanded="false">
@@ -116,7 +132,7 @@
                             <div class="table-responsive">
                               <div class="dataTables_scrollBodyWrapper">
                                 <div class="dataTables_scrollBody">
-                                    <table id="myTable" class="table table-striped table-hover table-bordered">
+                                   <table id="myTable" class="table table-striped display">
                                     <thead>
                                         <tr>
                                             <th>View</th>
@@ -142,6 +158,14 @@
                                             </tr>
                                         {% endfor %}
                                     </tbody>
+                                     <tfoot>
+                                        <tr>
+                                            <th>View</th>
+                                            {% for key in data[0].keys() %}
+                                                <th>{{ key }}</th>
+                                            {% endfor %}
+                                        </tr>
+                                    </tfoot>
                                   </table>
                                 </div>
                               </div>
@@ -205,7 +229,7 @@
 
                     <div class="tab-pane fade" id="comparison-tab-pane" role="tabpanel" aria-labelledby="comparison-tab" tabindex="0">
                         <h5 class="card-title">Hotel Comparison Analysis</h5>
-                        
+
                         <div class="row mb-4">
                             <div class="col-md-8">
                                 <div class="form-group mb-3">
@@ -227,7 +251,7 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div class="row mb-3">
                             <div class="col-12">
                                 <button id="generateComparisonBtn" class="btn btn-primary">
@@ -235,7 +259,7 @@
                                 </button>
                             </div>
                         </div>
-                        
+
                         <div id="comparisonAlert"></div>
 
                         <div class="row" >
@@ -316,7 +340,7 @@
             // Handle click on view button
             $('#myTable tbody').on('click', '.view-button', function () {
                 var rowIndex = $(this).data('row-index');
-                
+
                  //Use this code to get all data
                 var allData = dataTable.rows().data().toArray();
                 var rowData = allData[rowIndex]; // Get row data
@@ -419,23 +443,23 @@
             } else {
                 lightModeIcon.classList.add('active'); // Show light mode icon by default
             }
-            
+
             // Set the initial chart theme based on dark mode setting
             const initialTheme = savedDarkMode === 'true' ? 'plotly_dark' : 'plotly_white';
 
             // Event listener for the switch
             darkModeSwitch.addEventListener('change', function() {
                 setTheme(this.checked);
-                
+
                 // Update charts with dark/light theme
                 updateChartsTheme(this.checked);
             });
-            
+
             // Function to update all charts with appropriate theme
             function updateChartsTheme(isDarkMode) {
                 const theme = isDarkMode ? 'plotly_dark' : 'plotly_white';
                 const chartDivs = ['ratingDistributionChart', 'priceDistributionChart', 'marketPositioningChart', 'amenityAnalysisChart', 'hotelComparisonChart'];
-                
+
                 chartDivs.forEach(chartDiv => {
                     const chartElement = document.getElementById(chartDiv);
                     if (chartElement && chartElement.data && chartElement.layout) {
@@ -526,11 +550,11 @@
         function createComparisonChart(selectedHotels, comparisonType) {
             const chartDiv = document.getElementById('hotelComparisonChart');
             chartDiv.innerHTML = '<div class="text-center"><i class="fas fa-spinner fa-spin fa-3x"></i><p>Generating comparison...</p></div>';
-            
+
             // Get the current theme
             const isDarkMode = document.getElementById('darkModeSwitch').checked;
             const theme = isDarkMode ? 'plotly_dark' : 'plotly_white';
-            
+
             // Fetch the comparison data from the server
             $.ajax({
                 url: '/hotel_comparison',
@@ -560,41 +584,41 @@
         // Initialize comparison selection functionality
         function initComparisonTools() {
             const hotelData = [];
-            
+
             // Extract hotel data from the table
             $('#myTable').DataTable().rows().data().each(function(row) {
                 // Skip the first column which is the View button
                 const name = row[1];
                 hotelData.push(name);
             });
-            
+
             // Populate the hotel selection dropdown
             const comparisonSelect = $('#hotelComparisonSelect');
             hotelData.forEach(hotel => {
                 comparisonSelect.append($('<option></option>').val(hotel).text(hotel));
             });
-    
+
             // Initialize the multiselect functionality
             $('#hotelComparisonSelect').select2({
                 placeholder: 'Select hotels to compare',
                 maximumSelectionLength: 5,
                 width: '100%'
             });
-            
+
             // Handle comparison button click
             $('#generateComparisonBtn').click(function() {
                 const selectedHotels = $('#hotelComparisonSelect').val();
                 const comparisonType = $('#comparisonTypeSelect').val();
-                
+
                 if (selectedHotels.length < 2) {
                 $('#comparisonAlert').html('<div class="alert alert-warning">Please select at least 2 hotels to compare</div>');
                 return;
                 }
-                
+
                 $('#comparisonAlert').html('');
                 createComparisonChart(selectedHotels, comparisonType);
             });
-            
+
             // Update chart when comparison type changes (if hotels are already selected)
             $('#comparisonTypeSelect').change(function() {
                 const selectedHotels = $('#hotelComparisonSelect').val();
@@ -603,7 +627,7 @@
                 }
             });
         }
-        
+
         function escapeQuotes(inputString) {
           // Use a regular expression to match single and double quotes and escape them
           return inputString.replace(/['"]/g, '\\$&');

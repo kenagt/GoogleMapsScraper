@@ -1036,6 +1036,39 @@ def hotel_comparison():
         app.logger.error(f"Comparison error: {str(e)}", exc_info=True)
         return json.dumps({"error": str(e)})
 
+@app.route('/quick_scrape', methods=['POST'])
+def quick_scrape():
+    """Handle quick scrape of a single URL"""
+    global scraping_in_progress
+    
+    if scraping_in_progress:
+        flash("Scraping is already in progress.", 'warning')
+        return redirect(url_for('index'))
+    
+    scrape_url = request.form.get('scrape_url', '')
+    
+    if not scrape_url or not scrape_url.startswith('https://www.google.com/maps'):
+        flash("Please enter a valid Google Maps URL.", 'danger')
+        return redirect(url_for('index'))
+    
+    scraping_in_progress = True
+    flash("Quick scrape started. Please wait...", 'info')
+    run_quick_scrape(scrape_url)    
+    
+    return redirect(url_for('index'))
+
+def run_quick_scrape(url):
+    """Wrapper function to run the scraping and update the flag."""
+    global scraping_in_progress
+    try:
+        perform_scraping(url)  # Call your scraping function
+        flash("Scraping finished!", 'success')
+    except Exception as e:
+        flash(f"Scraping failed: {str(e)}", 'danger')
+        # Log the error (optional)
+        app.logger.error("Scraping error:", exc_info=True)
+    finally:
+        scraping_in_progress = False  # Reset flag
 
 if __name__ == '__main__':
     app.run(debug=True)

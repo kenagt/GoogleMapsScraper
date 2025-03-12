@@ -105,7 +105,6 @@ table.dataTable thead th {
 }
 
 .modal-header {
-    background: var(--bs-tertiary-bg);
     border-bottom: none;
     padding: 1rem 1.5rem;
     border-top-left-radius: 15px;
@@ -250,8 +249,8 @@ footer {
     transition: background-color 0.3s ease; /*Added transition for smooth change*/
 }
 footer.dark-mode{
-    background-color: var(--bg-dark);
-    color: var(--bg-light);
+    background-color: black;
+    color: white;
 }        
 
 .chart-container {
@@ -265,28 +264,6 @@ footer.dark-mode{
     margin-left: auto;  /* Center horizontally */
     margin-right: auto; /* Center horizontally */
 }
-
-/* Dark mode CSS */
-:root {
-    --text-light: #333;
-    --text-dark: #f0f0f0;
-    --bg-light: #fff;
-    --bg-dark: #222;
-}
-
-[data-bs-theme="dark"] {
-    --bs-body-bg: var(--bg-dark);
-    --bs-body-color: var(--text-dark);
-}
-
-.dark-mode {
-    color: var(--text-dark);
-}
-
-h1.dark-mode, .scraper-icon.dark-mode {
-    color: var(--text-dark);
-}
-
 /* General styling */
 body {
     transition: background-color 0.3s, color 0.3s;
@@ -314,17 +291,6 @@ html[data-bs-theme="dark"] {
     display: inline-block;
 }
 
-footer {
-    text-align: center;
-    margin-top: 50px;
-    padding: 20px 0;
-    border-top: 1px solid #eee;
-}
-
-footer.dark-mode {
-    border-top-color: var(--bs-body-bg);
-}
-
 /* Making the table more responsive */
 .dataTables_scrollBodyWrapper {
     overflow-x: auto;
@@ -342,35 +308,44 @@ html[data-bs-theme="dark"] .modal-data-container {
     background-color: rgba(255, 255, 255, 0.05);
 }
 
-/* Footer Styles */
+/* Footer styling */
 footer {
-    background-color: #f8f9fa;
-    padding: 10px 0;
     text-align: center;
-    border-top: 1px solid #dee2e6;
-    margin-top: 20px; /* Add some space above the footer */
-    transition: background-color 0.3s ease; /*Added transition for smooth change*/
+    padding: 1rem 0;
+    margin-top: 2rem;
+    font-size: 0.9rem;
+    color: #6c757d;
 }
 
-footer.dark-mode{
-    background-color: var(--bs-body-bg);
-    color: var(--bg-light);
-}        
+footer.dark-mode {
+    color: #adb5bd;
+}
 
-.chart-container {
-    margin-top: 20px;
-    margin-bottom: 20px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    padding: 10px;
-    width: 100%;          /* Still needed for responsiveness */
-    position: relative;   /* Still needed for aspect ratio */
-    margin-left: auto;  /* Center horizontally */
-    margin-right: auto; /* Center horizontally */
+/* Chart containers */
+#ratingDistributionChart, 
+#priceDistributionChart, 
+#marketPositioningChart, 
+#amenityAnalysisChart, 
+#hotelComparisonChart {
+    width: 100%;
+    margin: 0 auto;
 }
 
 /* Search form styling */
+.form-control:focus {
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
 
+html[data-bs-theme="dark"] .form-control {
+    background-color: #343a40;
+    color: #f8f9fa;
+    border-color: #495057;
+}
+
+html[data-bs-theme="dark"] .form-control:focus {
+    background-color: #343a40;
+    color: #f8f9fa;
+}
 
 /* Badges for amenities */
 .badge {
@@ -391,4 +366,177 @@ footer.dark-mode{
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     transition: all 0.3s ease;
+}
+/* Dark mode CSS */
+:root {
+    --text-light: #333;
+    --text-dark: #f0f0f0;
+    --bg-light: #fff;
+    --bg-dark: #222;
+}
+
+[data-bs-theme="dark"] {
+    --bs-body-bg: var(--bg-dark);
+    --bs-body-color: var(--text-dark);
+}
+
+.dark-mode {
+    color: var(--text-dark);
+}
+
+h1.dark-mode, .scraper-icon.dark-mode {
+    color: var(--text-dark);
+}
+
+/* For setting up dark mode icon visibility */
+.dark-mode-icon {
+    display: none;
+}
+
+.dark-mode-icon.active {
+    display: inline-block;
+}
+
+footer {
+    text-align: center;
+    margin-top: 50px;
+    padding: 20px 0;
+    border-top: 1px solid #eee;
+}
+
+footer.dark-mode {
+    border-top-color: #444;
+}
+
+.scraper-icon {
+    color: #0d6efd;
+    font-size: 1.5em;
+}
+
+/* For DataTables horizontal scrollbar */
+.dataTables_scrollBodyWrapper {
+    overflow-x: auto;
+}
+
+.modal-data-container {
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+}
+
+/* Map styles */
+.map-container {
+    position: relative;
+}
+
+#map {
+    transition: all 0.3s ease;
+}
+
+#map:hover {
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.coordinates-display {
+    transition: all 0.3s ease;
+}
+
+[data-bs-theme="dark"] .coordinates-display {
+    background-color: rgba(50, 50, 50, 0.8);
+    color: white;
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+    #map {
+        height: 300px;
+    }
+    
+    .btn-group {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .btn-group .btn {
+        margin-bottom: 5px;
+        border-radius: 4px !important;
+    }
+}
+/* Quick Scrape Form Styling */
+.quick-scrape-card {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+}
+
+.quick-scrape-card:hover {
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+    transform: translateY(-2px);
+}
+
+.quick-scrape-card .card-header {
+    background: linear-gradient(to right, #f8f9fa, #eeeeee);
+    border-bottom: none;
+    border-radius: 10px 10px 0 0;
+    padding: 1rem 1.5rem;
+}
+
+html[data-bs-theme="dark"] .quick-scrape-card .card-header {
+    background: linear-gradient(to right, #343a40, #212529);
+}
+
+.quick-scrape-card .input-group {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.quick-scrape-card .btn {
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.quick-scrape-card .btn:hover {
+    transform: translateY(-1px);
+}
+
+.quick-scrape-card .input-group-text {
+    color: #666;
+    border-right: none;
+}
+
+.quick-scrape-card input.form-control {
+    border-left: none;
+    height: 46px;
+}
+
+html[data-bs-theme="dark"] .quick-scrape-card .input-group-text {
+    background-color: #343a40;
+    color: #adb5bd;
+    border-color: #495057;
+}
+
+html[data-bs-theme="dark"] .quick-scrape-card input.form-control {
+    border-color: #495057;
+}
+
+/* Button Group Styling */
+.btn-group .btn {
+    font-weight: 500;
+    padding: 0.6rem 1rem;
+    margin-right: 5px;
+    border-radius: 8px !important;
+    transition: all 0.2s ease;
+}
+
+.btn-group .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.btn-group {
+    box-shadow: none !important;
+    flex-wrap: wrap;
+    gap: 8px;
 }
