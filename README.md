@@ -1,4 +1,4 @@
-# Setup Instructions for TestProjectCorzlyKenan
+# Setup Instructions for GoogleMapsScraper
 
 Follow the steps below to set up the project on your system.
 
@@ -22,10 +22,10 @@ pip install virtualenv
 cd path/to/your/folder
 
 # Clone the repository
-git clone https://github.com/kenagt/TestProjectCorzlyKenan
+git clone https://github.com/kenagt/GoogleMapsScraper
 
 # Navigate into the project folder
-cd TestProjectCorzlyKenan
+cd GoogleMapsScraper
 
 # Create a virtual environment
 python -m venv .venv
