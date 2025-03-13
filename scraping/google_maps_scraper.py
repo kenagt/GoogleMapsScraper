@@ -128,7 +128,7 @@ def scrape_google_maps_urls(driver):
         logger.info(f"Loaded URL number: {str(len(urls))}")
 
         ###COMMENT
-        break
+        #break
 
         ###UNCOMMENT
         # Scroll down to load more businesses
@@ -184,6 +184,9 @@ def scrape_url_data(google_url, chrome_options):
 
             if not url:
                 url = "N/A"
+            else:
+                url = "https://" + url
+
         except Exception as e:
             url = "N/A"
             logger.error(f"url: {e}")
@@ -423,10 +426,6 @@ def scrape_url_data(google_url, chrome_options):
         else:
             socialMediaLinks = "N/A"
 
-        # emails - scrape from webpages with crawler
-        
-        
-
         driver.quit()  #Quit driver after usage
 
         logger.info(f"Finished scraping URL: {google_url}")
@@ -434,7 +433,7 @@ def scrape_url_data(google_url, chrome_options):
         return {
             "name": name,
             "phone": phone,
-            "url": "https://" + url,
+            "url": url,
             "googleMapsUrl": google_url,
             "address": address,
             "numberOfReviews": numberOfReviews,
