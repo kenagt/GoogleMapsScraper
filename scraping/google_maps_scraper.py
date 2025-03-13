@@ -9,14 +9,13 @@ from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium.webdriver.chrome.options import Options  # Import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from webdriver_manager.chrome import ChromeDriverManager
 from bs4 import BeautifulSoup
 import re
 import pandas as pd
 import logging
 import queue
-from domain_explorer import DomainExplorer
-from email_output import EmailOutput
+from scraping.domain_explorer import DomainExplorer
+from scraping.email_output import EmailOutput
 
 # Configure logging
 logging.basicConfig(level=logging.INFO,
@@ -129,7 +128,7 @@ def scrape_google_maps_urls(driver):
         logger.info(f"Loaded URL number: {str(len(urls))}")
 
         ###COMMENT
-        #break
+        break
 
         ###UNCOMMENT
         # Scroll down to load more businesses
@@ -435,7 +434,7 @@ def scrape_url_data(google_url, chrome_options):
         return {
             "name": name,
             "phone": phone,
-            "url": url,
+            "url": "https://" + url,
             "googleMapsUrl": google_url,
             "address": address,
             "numberOfReviews": numberOfReviews,
@@ -446,8 +445,8 @@ def scrape_url_data(google_url, chrome_options):
             "otaLinks": otaLinks,
             "averageOtaPrice": averageOtaPrice,
             "socialMediaLinks": socialMediaLinks,
-            "workingHours": workingHours
-            #"email": email
+            "workingHours": workingHours,
+            "emails": ""
         }
 
     except Exception as e:
@@ -563,15 +562,13 @@ def perform_scraping(url=None,
         with open("results/google_maps_results.json", 'r') as file:
             json_data = json.load(file)
 
+        website_urls = []
         # Process each object in the array
-        for item in json_data:
-            # Extract all URL values from this item
-            urls = []
-            for key, value in item.items():
-                if "url" in key.lower() and isinstance(value, str) and value != "N/A":
-                    urls.append(value)
+        for record in json_data:
+            if record.get('url'):
+                website_urls.append(record['url'])
 
-        perform_email_scraping(urls, json_data)
+        perform_email_scraping(website_urls, json_data)
 
         # Write the data to the CSV file
         write_to_csv()

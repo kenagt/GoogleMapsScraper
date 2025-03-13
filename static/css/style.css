@@ -272,6 +272,7 @@ body {
 
 html[data-bs-theme="dark"] {
     --bs-body-bg: #212529;
+    --bs-span-bg: #312529;
     --bs-body-color: #f8f9fa;
 }
 
@@ -531,7 +532,7 @@ html[data-bs-theme="dark"] .quick-scrape-card .card-header {
 }
 
 .quick-scrape-card .input-group-text {
-    color: #666;
+    background-color: var(--bs-span-bg);
     border-right: none;
 }
 

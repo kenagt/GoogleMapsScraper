@@ -1053,7 +1053,10 @@ def quick_scrape():
     
     scraping_in_progress = True
     flash("Quick scrape started. Please wait...", 'info')
-    run_quick_scrape(scrape_url)    
+    # Run scraping in a separate thread
+    scraping_thread = threading.Thread(target=lambda: run_quick_scrape(scrape_url))
+    scraping_thread.daemon = True  # Allow app to exit even if thread is running
+    scraping_thread.start()   
     
     return redirect(url_for('index'))
 

@@ -12,13 +12,13 @@ class EmailOutput(Thread):
     def run(self):
         while True:
             domain, emaillist = self.work.get()
-            
+
             for item in self.json_data:
                  if item.get("url") == domain:
-                    item["emails"] = ", ".join(emaillist)
+                    item["emails"] = emaillist
 
             # Write the updated JSON back to the file
-            with open('data.json', 'w') as file:
+            with open('results/google_maps_results.json', 'w') as file:
                 json.dump(self.json_data, file, indent=4)
             
             self.work.task_done()
