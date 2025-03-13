@@ -128,7 +128,7 @@ def scrape_google_maps_urls(driver):
         logger.info(f"Loaded URL number: {str(len(urls))}")
 
         ###COMMENT
-        #break
+        break
 
         ###UNCOMMENT
         # Scroll down to load more businesses
@@ -455,7 +455,7 @@ def scrape_url_data(google_url, chrome_options):
         logger.error(f"Error scraping : {e.__traceback__.tb_lineno}")
         return None
 
-def perform_email_scraping(urls, json_data):
+def perform_email_scraping(website_urls, json_data):
     # Define two queues to work with. Set maxsize for the main queue
     domainqueue = queue.Queue(maxsize=5000)
     emailsqueue = queue.Queue()
@@ -475,7 +475,7 @@ def perform_email_scraping(urls, json_data):
 
     # Add domains to the queue from a context manager to save memory
     
-    for domain in urls:
+    for domain in website_urls:
         domainqueue.put(domain)
 
     # Gracefully join our queues so that our threads can exit
@@ -531,17 +531,9 @@ def perform_scraping(url=None,
 
     try:
         urls = scrape_google_maps_urls(driver)
-
-        # Limit the number of URLs to process
-        if max_results and max_results < len(urls):
-            urls = urls[:max_results]
+        write_to_json(urls, "results/google_maps_results_urls.json")
 
         num_processes = multiprocessing.cpu_count()
-        # Use fewer processes if we have fewer URLs
-        if len(urls) < num_processes:
-            num_processes = len(urls)
-
-        write_to_json(urls, "results/google_maps_results_urls.json")
         logger.info(
             f"Processing {len(urls)} URLs with {num_processes} processes")
 
@@ -549,14 +541,16 @@ def perform_scraping(url=None,
             # Map the scraping function to the URLs
             results = pool.starmap(
                 scrape_url_data,
-                [(google_url, chrome_options)
-                 for google_url in urls])  #Pass chrome_install one time
+                [(google_url, chrome_options) for google_url in urls])  #Pass chrome_install one time
 
         # Filter out None results and format the output
         scraped_data = [result for result in results if result is not None]
 
         # Write the data to the JSON file
         write_to_json(scraped_data, "results/google_maps_results.json")
+
+        # Write the data to the CSV file
+        write_to_csv()
 
         # Read the JSON file
         with open("results/google_maps_results.json", 'r') as file:
@@ -565,13 +559,11 @@ def perform_scraping(url=None,
         website_urls = []
         # Process each object in the array
         for record in json_data:
-            if record.get('url'):
+            if record['url'] != "N/A":
                 website_urls.append(record['url'])
-
+                
         perform_email_scraping(website_urls, json_data)
 
-        # Write the data to the CSV file
-        write_to_csv()
         return True
     except Exception as e:
         logger.error(f"An error occurred: {e}")

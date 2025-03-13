@@ -84,5 +84,6 @@ class DomainExplorer(Thread):
             except Exception as e:
                 logger.error(f"{link} Didn't Process because: {e}")
                 return list(set(emails))
+        print(emails)
         
         return ", ".join(emails)
