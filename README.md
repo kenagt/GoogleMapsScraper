@@ -172,3 +172,11 @@ Select the location on map and start scraping nearby places based on field Searc
 Paste Google Maps URL and start scraping places.
 
 ![Home page](screenshots/custom_search.png)
+
+
+### Detail page
+Detail page can be opened by clicking "View" button, and next details are shown.
+
+![Home page](screenshots/details1.png)
+
+![Home page](screenshots/details2.png)
