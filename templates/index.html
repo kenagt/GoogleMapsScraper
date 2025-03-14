@@ -88,12 +88,12 @@
                     </li>
                     <li class="nav-item" role="presentation">
                         <button class="nav-link" id="ratings-tab" data-bs-toggle="tab" data-bs-target="#ratings-tab-pane" type="button" role="tab" aria-controls="ratings-tab-pane" aria-selected="false">
-                            <i class="fas fa-star me-1"></i> Ratings
+                            <i class="fas fa-star me-1"></i> Rating distribution
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
                         <button class="nav-link" id="prices-tab" data-bs-toggle="tab" data-bs-target="#prices-tab-pane" type="button" role="tab" aria-controls="prices-tab-pane" aria-selected="false">
-                            <i class="fas fa-dollar-sign me-1"></i> Prices
+                            <i class="fas fa-dollar-sign me-1"></i> Prices distribution
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
@@ -108,7 +108,7 @@
                     </li>
                     <li class="nav-item" role="presentation">
                         <button class="nav-link" id="comparison-tab" data-bs-toggle="tab" data-bs-target="#comparison-tab-pane" type="button" role="tab" aria-controls="comparison-tab-pane" aria-selected="false">
-                            <i class="fas fa-chart-bar me-1"></i> Hotel Comparison
+                            <i class="fas fa-chart-bar me-1"></i> Comparison
                         </button>
                     </li>
                 </ul>
@@ -117,7 +117,6 @@
                 <div class="tab-content" id="chartTabsContent">
                     <!-- Data Tab -->
                     <div class="tab-pane fade show active" id="data-tab-pane" role="tabpanel" aria-labelledby="data-tab" tabindex="0">
-                        <h5 class="card-title mb-3">Hotel Data</h5>
                         <div id="tableLoadingIndicator" class="text-center p-4" style="display: none;">
                             <div class="spinner-border text-primary" role="status">
                                 <span class="visually-hidden">Loading...</span>
@@ -165,7 +164,6 @@
 
                     <!-- Ratings Tab -->
                     <div class="tab-pane fade" id="ratings-tab-pane" role="tabpanel" aria-labelledby="ratings-tab" tabindex="0">
-                        <h5 class="card-title">Hotel Rating Distribution</h5>
                         <div class="row" >
                             <div class="container d-flex align-items-center justify-content-center" >
                                 <div id="ratingDistributionChart"></div>
@@ -175,7 +173,6 @@
 
                     <!-- Prices Tab -->
                     <div class="tab-pane fade" id="prices-tab-pane" role="tabpanel" aria-labelledby="prices-tab" tabindex="0">
-                        <h5 class="card-title">Hotel Price Distribution</h5>
                         <div class="row" >
                             <div class="container d-flex align-items-center justify-content-center" >
                                 <div id="priceDistributionChart"></div>
@@ -185,7 +182,6 @@
 
                     <!-- Market Positioning Tab -->
                     <div class="tab-pane fade" id="positioning-tab-pane" role="tabpanel" aria-labelledby="positioning-tab" tabindex="0">
-                        <h5 class="card-title">Market Positioning Map: Price vs. Quality</h5>                        
                         <div class="row" >
                             <div class="container d-flex align-items-center justify-content-center" >
                                 <div id="marketPositioningChart"></div>
@@ -195,11 +191,10 @@
 
                     <!-- Amenity Analysis Tab -->
                     <div class="tab-pane fade" id="amenities-tab-pane" role="tabpanel" aria-labelledby="amenities-tab" tabindex="0">
-                        <h5 class="card-title">Amenity Gap Analysis</h5>
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="hotelSelect" class="form-label">Select Hotel:</label>
+                                    <label for="hotelSelect" class="form-label">Select business:</label>
                                     <select class="form-select" id="hotelSelect">
                                         {% for hotel_name in hotels_with_amenities %}
                                         <option value="{{ hotel_name }}">{{ hotel_name }}</option>
@@ -216,12 +211,11 @@
                     </div>
 
                     <div class="tab-pane fade" id="comparison-tab-pane" role="tabpanel" aria-labelledby="comparison-tab" tabindex="0">
-                        <h5 class="card-title">Hotel Comparison Analysis</h5>
 
                         <div class="row mb-4">
                             <div class="col-md-8">
                                 <div class="form-group mb-3">
-                                    <label for="hotelComparisonSelect" class="form-label">Select Hotels to Compare (2-5):</label>
+                                    <label for="hotelComparisonSelect" class="form-label">Select businesses to Compare (2-5):</label>
                                     <select class="form-select" id="hotelComparisonSelect" multiple>
                                         <!-- Options will be populated dynamically -->
                                     </select>
@@ -255,7 +249,7 @@
                                 <div id="hotelComparisonChart">                                    
                                     <div class="text-center text-muted">
                                         <i class="fas fa-chart-bar fa-3x mb-3"></i>
-                                        <p>Select hotels and comparison type above to generate a comparison chart</p>
+                                        <p>Select businesses and comparison type above to generate a comparison chart</p>
                                     </div>
                                 </div>
                             </div>
@@ -620,7 +614,7 @@
 
             // Initialize the multiselect functionality
             $('#hotelComparisonSelect').select2({
-                placeholder: 'Select hotels to compare',
+                placeholder: 'Select businesses to compare',
                 maximumSelectionLength: 5,
                 width: '100%'
             });
