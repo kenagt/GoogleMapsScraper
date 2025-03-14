@@ -180,3 +180,4 @@ Detail page can be opened by clicking "View" button, and next details are shown.
 ![Home page](screenshots/details1.png)
 
 ![Home page](screenshots/details2.png)
+
