@@ -117,6 +117,26 @@ Download and install [Visual Studio Code](https://code.visualstudio.com/) for yo
 - **Mac**: [Download for Mac](https://code.visualstudio.com/download)
 
 ## 2. Set Up the Environment
+## 3. Screnshots
+
+# Home page
+Home page of flask application.
+![Home page](screenshots/home_page.png)
+
+
+# Custom search
+Custom search that allows you to enter fields like Search Query(e.g., hotels in New York), Latitude (optional e.g., 40.7128), Longitude (optional e.g., -74.0060) , Search Radius (meters), Maximum Results
+![Custom Search](screenshots/custom_search.png)
+
+
+# Location based search
+Select the location on map and start scraping nearby places based on field Search Query, Search Radius (meters), Maximum Results
+![Home page](screenshots/location_based_search.png)
+
+
+# Quick scrape
+Paste Google Maps URL and start scraping places.
+![Home page](screenshots/custom_search.png)
 
 Open the **Terminal** and execute the following commands:
 
@@ -147,22 +167,4 @@ python -m pip install -r requirements.txt
 
 python app.py
 
-
-# Home page
-Home page of flask application.
-![Home page](screenshots/home_page.png)
-
-
-# Custom search
-Custom search that allows you to enter fields like Search Query(e.g., hotels in New York), Latitude (optional e.g., 40.7128), Longitude (optional e.g., -74.0060) , Search Radius (meters), Maximum Results
-![Custom Search](screenshots/custom_search.png)
-
-
-# Location based search
-Select the location on map and start scraping nearby places based on field Search Query, Search Radius (meters), Maximum Results
-![Home page](screenshots/location_based_search.png)
-
-
-# Quick scrape
-Paste Google Maps URL and start scraping places.
-![Home page](screenshots/custom_search.png)
+## 3. 
