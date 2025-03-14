@@ -268,9 +268,9 @@ def create_rating_distribution_chart():
     ])
 
     fig.update_layout(
-        title="Hotel Rating Distribution",
+        title="Rating Distribution",
         xaxis_title="Star Ratings",
-        yaxis_title="Number of Hotels",
+        yaxis_title="Number of data",
         template="plotly_white",
         showlegend=False,
         width=500,
@@ -325,7 +325,7 @@ def create_price_distribution_chart():
     ])
 
     fig.update_layout(
-        title="Hotel Price Distribution",
+        title="Price Distribution",
         template="plotly_white",
         width=500,
         height=500,
@@ -701,8 +701,8 @@ def create_bar_comparison(hotel_data):
                 textposition='auto'))
 
     # Update layout
-    fig.update_layout(title="Hotel Key Metrics Comparison",
-                      xaxis_title="Hotels",
+    fig.update_layout(title="Key Metrics Comparison",
+                      xaxis_title="Businesses",
                       yaxis_title="Values",
                       barmode='group',
                       template="plotly_white",
@@ -824,7 +824,7 @@ def create_radar_comparison(hotel_data):
                             name=hotel['name']))
 
     # Update layout
-    fig.update_layout(title="Hotel Performance Radar Chart",
+    fig.update_layout(title="Performance Radar Chart",
                       polar=dict(radialaxis=dict(visible=True, range=[0, 10])),
                       template="plotly_white",
                       height=500,
@@ -888,12 +888,12 @@ def create_amenities_comparison(hotel_data):
                          font=dict(color="black")))
 
     # Update layout
-    fig.update_layout(title="Hotel Amenities Comparison",
+    fig.update_layout(title="Amenities Comparison",
                       height=max(500, 100 + 25 * len(all_amenities)),
                       width=900,
                       template="plotly_white",
                       annotations=annotations,
-                      xaxis=dict(title="Hotels"),
+                      xaxis=dict(title="Businesses"),
                       yaxis=dict(title="Amenities"))
 
     return pio.to_json(fig)
@@ -967,8 +967,8 @@ def create_value_comparison(hotel_data):
                    marker=dict(size=10)))
 
     # Update layout with dual y-axes
-    fig.update_layout(title="Hotel Value for Money Analysis",
-                      xaxis=dict(title="Hotels"),
+    fig.update_layout(title="Value for Money Analysis",
+                      xaxis=dict(title="Businesess"),
                       yaxis=dict(title="Value Score (Rating/Price × 100)",
                                  side="left",
                                  color="blue"),
@@ -1012,7 +1012,7 @@ def hotel_comparison():
 
         # Validate input
         if not selected_hotels or len(selected_hotels) < 2:
-            return json.dumps({"error": "Please select at least 2 hotels"})
+            return json.dumps({"error": "Please select at least 2 businesses"})
 
         # Get data for selected hotels
         hotel_data = []
