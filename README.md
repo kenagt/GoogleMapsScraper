@@ -39,7 +39,7 @@ A Python tool that automates the extraction of business data from Google Maps, w
 Run the script with default parameters:
 
 ```python
-python scraper.py
+python google_maps_scraper.py
 ```
 
 This will search for hotels in a default location and save the results.
