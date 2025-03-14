@@ -395,7 +395,7 @@ def scrape_url_data(google_url, chrome_options):
         # Social media links
         if url != "N/A":
             try:
-                driver.get("https://" + url)
+                driver.get(url)
                 WebDriverWait(driver, 10).until(
                     EC.presence_of_element_located((By.TAG_NAME, "body")))
 
