@@ -128,7 +128,7 @@ def scrape_google_maps_urls(driver):
         logger.info(f"Loaded URL number: {str(len(urls))}")
 
         ###COMMENT
-        break
+        #break
 
         ###UNCOMMENT
         # Scroll down to load more businesses
@@ -176,16 +176,14 @@ def scrape_url_data(google_url, chrome_options):
 
         # link to the hotels website
         try:
-            url = clean_text(
-                WebDriverWait(driver, 2).until(
-                    EC.presence_of_element_located(
-                        (By.CSS_SELECTOR,
-                         "[data-item-id*='authority']"))).text)
-
-            if not url:
+            urlHtml = driver.page_source
+            soup = BeautifulSoup(urlHtml, 'html.parser')
+            a = soup.find("a", "CsEnBe")
+            
+            if not a['href']:
                 url = "N/A"
             else:
-                url = "https://" + url
+                url = a['href']
 
         except Exception as e:
             url = "N/A"
@@ -483,6 +481,9 @@ def perform_email_scraping(website_urls, json_data):
     emailsqueue.join()
     logger.info("Collector finished processing")
 
+    # Write the updated data to the CSV file
+    write_to_csv()
+
 def perform_scraping(url=None,
                     search_query=None,
                      location=None,
@@ -547,9 +548,6 @@ def perform_scraping(url=None,
 
         # Write the data to the JSON file
         write_to_json(scraped_data, "results/google_maps_results.json")
-
-        # Write the data to the CSV file
-        write_to_csv()
 
         # Read the JSON file
         with open("results/google_maps_results.json", 'r') as file:

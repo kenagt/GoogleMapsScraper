@@ -372,13 +372,21 @@
                             // Improved URL check using a regular expression (no numbers in TLD)
                             var urlRegex = /^(?:(?:https?|ftp):\/\/)?(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z]{2,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&//=]*)$/i;
                             var urlRegex2 = /https?:\/\/[a-zA-Z0-9\-\.]+(?:\:[0-9]+)?(?:\/[\w\-\.]*)*(?:\?[\w\=\&\%]*)?(?:#[\w\-]*)?/;
+                            var emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
-                            if (urlRegex.test(part) || urlRegex2.test(part)) {
-                                // Add protocol if missing
-                                var href = part.startsWith('http') ? part : 'https://' + part;
-                                html += '<div class="mb-1"><a href="' + href + '" target="_blank" rel="noopener noreferrer">' + part.substring(0, 50) + '...</a></div>';
+                            if ((urlRegex.test(part) || urlRegex2.test(part)) && !emailRegex.test(part)) {
+                                if(emailRegex.test(part)) {
+                                    html += '<span class="bg-secondary me-1" style="padding:7px;">' + part + '</span>';
+                                }
+                                else {
+                                    // Add protocol if missing
+                                    var href = part.startsWith('http') ? part : 'https://' + part;
+                                    html += '<div class="mb-1"><a href="' + href + '" target="_blank" rel="noopener noreferrer">' + part.substring(0, 50) + '...</a></div>';
+                                }
                             } else {
-                                html += '<span class="badge bg-secondary me-1" style="padding:7px;">' + part + '</span>';
+                                html += '<p>';
+                                html += '<a href="'+ part + '" class="email-link mt-2">'+ part + '</a>';
+                                html += '</p>';
                             }
                         }
                     } else {
